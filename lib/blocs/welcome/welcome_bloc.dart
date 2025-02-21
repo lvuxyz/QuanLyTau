@@ -8,9 +8,12 @@ class WelcomeBloc extends Bloc<WelcomeEvent, WelcomeState> {
   @override
   Stream<WelcomeState> mapEventToState(WelcomeEvent event) async* {
     if (event is NavigateToLoginEvent) {
-      // Handle navigation to login screen
+      // Thực hiện điều hướng đến màn hình đăng nhập
+      // Giả sử bạn đang dùng Navigator để điều hướng
+      yield NavigateToLoginState();
     } else if (event is NavigateToRegisterEvent) {
-      // Handle navigation to register screen
+      // Điều hướng đến màn hình đăng ký
+      yield NavigateToRegisterState();
     }
   }
 }

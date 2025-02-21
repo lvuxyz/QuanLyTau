@@ -5,6 +5,8 @@ allprojects {
     }
 }
 
+ext.kotlin_version = '1.9.0'  // Hoặc phiên bản Kotlin bạn muốn sử dụng
+
 rootProject.buildDir = "../build"
 subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"

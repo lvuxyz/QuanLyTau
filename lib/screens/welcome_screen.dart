@@ -3,7 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../blocs/welcome/welcome_bloc.dart';
 import '../blocs/welcome/welcome_event.dart';
 import '../blocs/welcome/welcome_state.dart';
-import 'login_screen.dart'; // Import màn hình Login
+import 'login_screen.dart';
+import 'register_screen.dart'; // Import for the RegisterScreen
 
 class WelcomeScreen extends StatelessWidget {
   @override
@@ -15,17 +16,17 @@ class WelcomeScreen extends StatelessWidget {
       body: BlocListener<WelcomeBloc, WelcomeState>(
         listener: (context, state) {
           if (state is NavigateToLoginState) {
-            // Điều hướng đến màn hình đăng nhập
+            // Navigate to login screen
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => LoginScreen()),
             );
           } else if (state is NavigateToRegisterState) {
-            // Điều hướng đến màn hình đăng ký nếu cần
-            // Navigator.push(
-            //   context,
-            //   MaterialPageRoute(builder: (context) => RegisterScreen()), // Tạo RegisterScreen nếu chưa có
-            // );
+            // Navigate to register screen
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => RegisterScreen()),
+            );
           }
         },
         child: Container(
@@ -85,7 +86,8 @@ class WelcomeScreen extends StatelessWidget {
                     context: context,
                     text: 'Đăng nhập',
                     onPressed: () {
-                      context.read<WelcomeBloc>().add(NavigateToLoginEvent());
+                      // Add the navigation event to the bloc
+                      BlocProvider.of<WelcomeBloc>(context).add(NavigateToLoginEvent());
                     },
                     isPrimary: true,
                   ),
@@ -94,23 +96,34 @@ class WelcomeScreen extends StatelessWidget {
                     context: context,
                     text: 'Đăng ký',
                     onPressed: () {
-                      context.read<WelcomeBloc>().add(NavigateToRegisterEvent());
+                      // Add the navigation event to the bloc
+                      BlocProvider.of<WelcomeBloc>(context).add(NavigateToRegisterEvent());
                     },
                     isPrimary: false,
                   ),
                   const SizedBox(height: 24),
-                  Align(
-                    alignment: Alignment.bottomLeft,
-                    child: Padding(
-                      padding: const EdgeInsets.only(right: 10.0, bottom: 24.0),
-                      child: Text(
-                        'Phiên bản 1.0.0',
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.5),
-                          fontSize: 12,
-                          fontWeight: FontWeight.w400,
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 24.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Phiên bản 1.0.0',
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.5),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w400,
+                          ),
                         ),
-                      ),
+                        Text(
+                          'Ship Manager',
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.5),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],

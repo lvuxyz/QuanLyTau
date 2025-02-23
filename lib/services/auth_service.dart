@@ -11,16 +11,18 @@ class AuthService {
       ? 'http://10.0.2.2:3000/api/v1'
       : 'http://localhost:3000/api/v1';
 
+  Map<String, String> get _headers => {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+  };
+
   Future<Map<String, dynamic>> login(String username, String password) async {
     try {
       print('Attempting login with URL: $baseUrl/auth/login');
 
       final response = await http.post(
         Uri.parse('$baseUrl/auth/login'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
+        headers: _headers,
         body: json.encode({
           'username': username,
           'password': password,
@@ -65,10 +67,7 @@ class AuthService {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/auth/forgot-password'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
+        headers: _headers,
         body: json.encode({'email': email}),
       );
 

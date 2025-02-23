@@ -1,4 +1,4 @@
-// blocs/login/login_state.dart
+// lib/blocs/login/login_state.dart
 abstract class LoginState {}
 
 class LoginInitial extends LoginState {}
@@ -15,6 +15,12 @@ class LoginFailure extends LoginState {
   final String errorMessage;
 
   LoginFailure({required this.errorMessage});
+}
+
+class NetworkError extends LoginState {
+  final String message;
+
+  NetworkError({this.message = 'Không thể kết nối đến máy chủ'});
 }
 
 class ForgotPasswordLoading extends LoginState {}

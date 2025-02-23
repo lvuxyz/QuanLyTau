@@ -2,7 +2,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../blocs/home/home_bloc.dart';
+import '../blocs/home/home_event.dart';
+import '../blocs/home/home_state.dart';
 
+// Rest of the HomeScreen implementation remains the same...
 class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {

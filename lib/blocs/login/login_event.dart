@@ -1,3 +1,4 @@
+// blocs/login/login_event.dart
 abstract class LoginEvent {}
 
 class LoginButtonPressed extends LoginEvent {
@@ -7,4 +8,8 @@ class LoginButtonPressed extends LoginEvent {
   LoginButtonPressed({required this.username, required this.password});
 }
 
-class ForgotPasswordPressed extends LoginEvent {}
+class ForgotPasswordPressed extends LoginEvent {
+  final String email;
+
+  ForgotPasswordPressed({required this.email});
+}

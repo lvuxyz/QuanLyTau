@@ -79,6 +79,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
+
   Widget _buildAppBar() {
     return SliverAppBar(
       floating: true,

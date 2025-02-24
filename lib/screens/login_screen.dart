@@ -119,25 +119,38 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _buildLoginButton() {
     return BlocBuilder<LoginBloc, LoginState>(
       builder: (context, state) {
-        return ElevatedButton(
-          onPressed: state is LoginLoading ? null : () {
-            if (_usernameController.text.isNotEmpty && _passwordController.text.isNotEmpty) {
-              context.read<LoginBloc>().add(
-                LoginButtonPressed(
-                  username: _usernameController.text,
-                  password: _passwordController.text,
-                ),
-              );
-            } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Vui lòng nhập tài khoản và mật khẩu')),
-              );
-            }
-          },
-          style: _buttonStyle(),
-          child: state is LoginLoading
-              ? CircularProgressIndicator(color: Colors.white)
-              : Text('Đăng nhập', style: TextStyle(fontSize: 18)),
+        return Container(
+          width: double.infinity,
+          height: 56,
+          decoration: BoxDecoration(
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF13B8A8).withOpacity(0.3),
+                offset: const Offset(0, 4),
+                blurRadius: 12,
+              ),
+            ],
+          ),
+          child: ElevatedButton(
+            onPressed: state is LoginLoading ? null : () {
+              if (_usernameController.text.isNotEmpty && _passwordController.text.isNotEmpty) {
+                context.read<LoginBloc>().add(
+                  LoginButtonPressed(
+                    username: _usernameController.text,
+                    password: _passwordController.text,
+                  ),
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Vui lòng nhập tài khoản và mật khẩu')),
+                );
+              }
+            },
+            style: _buttonStyle(),
+            child: state is LoginLoading
+                ? CircularProgressIndicator(color: Colors.white)
+                : Text('Đăng nhập', style: TextStyle(fontSize: 18)),
+          ),
         );
       },
     );

@@ -1,28 +1,39 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../services/auth_service.dart';
 import 'login_event.dart';
 import 'login_state.dart';
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
-  LoginBloc() : super(LoginInitial()) {
-    // Register event handlers using the on<EventType> method
+  final AuthService authService;
+
+  LoginBloc({required this.authService}) : super(LoginInitial()) {
     on<LoginButtonPressed>((event, emit) async {
       emit(LoginLoading());
       try {
-        // Simulate authentication logic
-        await Future.delayed(Duration(seconds: 1)); // Simulated API call delay
+        print('🛠 Đang gửi yêu cầu đăng nhập...');
 
-        if (event.username == 'user' && event.password == 'password') {
-          emit(LoginSuccess());
+        final result = await authService.login(
+          event.username,
+          event.password,
+        );
+
+        if (result['success'] == true) {
+          print('✅ Đăng nhập thành công');
+          emit(LoginSuccess(userData: result['data']));
         } else {
-          emit(LoginFailure(errorMessage: 'Sai tài khoản hoặc mật khẩu'));
+          print('❌ Lỗi đăng nhập: ${result['message']}');
+          emit(LoginFailure(errorMessage: result['message']));
         }
       } catch (e) {
-        emit(LoginFailure(errorMessage: 'Đã có lỗi xảy ra'));
+        print('⚠️ Lỗi kết nối đến máy chủ: $e');
+        emit(NetworkError(
+          message: 'Không thể kết nối đến máy chủ. Vui lòng thử lại sau.',
+        ));
       }
     });
 
-    on<ForgotPasswordPressed>((event, emit) {
-      emit(LoginFailure(errorMessage: 'Chức năng quên mật khẩu chưa được cài đặt'));
+    on<LoginReset>((event, emit) {
+      emit(LoginInitial());
     });
   }
 }

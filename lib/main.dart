@@ -13,6 +13,7 @@ class MyApp extends StatelessWidget {
     return BlocProvider(
       create: (context) => WelcomeBloc(), // Cung cấp WelcomeBloc ở đây
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         title: 'Ship Manager',
         home: WelcomeScreen(),  // Màn hình bắt đầu của ứng dụng
       ),

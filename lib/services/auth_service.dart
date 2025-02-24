@@ -1,4 +1,3 @@
-// lib/services/auth_service.dart
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -7,45 +6,64 @@ import 'dart:io' show Platform;
 class AuthService {
   bool get isAndroid => Platform.isAndroid;
 
-  String get baseUrl => isAndroid
-      ? 'http://10.0.2.2:3000/api/v1'
-      : 'http://localhost:3000/api/v1';
+  String get baseUrl {
+    if (isAndroid) {
+      return 'http://192.19.14.24:3000/api/v1'; // Thay địa chỉ IP máy tính vào đây
+    } else {
+      return 'http://localhost:3000/api/v1'; // Dành cho iOS hoặc Web
+    }
+  }
+
+
+  Map<String, String> get _headers => {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+  };
 
   Future<Map<String, dynamic>> login(String username, String password) async {
     try {
-      print('Attempting login with URL: $baseUrl/auth/login');
+      print('🔍 Sending POST request to: $baseUrl/auth/login');
+      print('📤 Request body: {"username": "$username", "password": "$password"}');
 
       final response = await http.post(
         Uri.parse('$baseUrl/auth/login'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
+        headers: _headers,
         body: json.encode({
           'username': username,
           'password': password,
         }),
       );
 
-      print('Response status: ${response.statusCode}');
-      print('Response body: ${response.body}');
+      print('📥 Response status: ${response.statusCode}');
+      print('📥 Response body: ${response.body}');
 
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
 
-        if (responseData['success']) {
-          if (responseData['data'] != null && responseData['data']['token'] != null) {
-            await _saveToken(responseData['data']['token']);
+        if (responseData['success'] == true) {
+          final data = responseData['data'];
+
+          // Kiểm tra nếu `data` null hoặc không chứa `token`
+          if (data == null || !data.containsKey('token')) {
+            return {
+              'success': false,
+              'message': 'Phản hồi API không hợp lệ (thiếu dữ liệu)'
+            };
           }
+
+          // Lưu token
+          await _saveToken(data['token']);
+
           return {
             'success': true,
-            'data': responseData['data']
+            'data': data
+          };
+        } else {
+          return {
+            'success': false,
+            'message': responseData['message'] ?? 'Đăng nhập thất bại'
           };
         }
-        return {
-          'success': false,
-          'message': responseData['message'] ?? 'Đăng nhập thất bại'
-        };
       } else {
         return {
           'success': false,
@@ -53,42 +71,10 @@ class AuthService {
         };
       }
     } catch (e) {
-      print('Login error: $e');
+      print('❌ Login error: $e');
       return {
         'success': false,
-        'message': 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng.'
-      };
-    }
-  }
-
-  Future<Map<String, dynamic>> forgotPassword(String email) async {
-    try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/auth/forgot-password'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: json.encode({'email': email}),
-      );
-
-      final responseData = json.decode(response.body);
-
-      if (response.statusCode == 200) {
-        return {
-          'success': true,
-          'message': responseData['message'] ?? 'Yêu cầu đặt lại mật khẩu đã được gửi'
-        };
-      } else {
-        return {
-          'success': false,
-          'message': responseData['message'] ?? 'Không thể gửi yêu cầu đặt lại mật khẩu'
-        };
-      }
-    } catch (e) {
-      return {
-        'success': false,
-        'message': 'Không thể kết nối đến máy chủ'
+        'message': 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra mạng'
       };
     }
   }
@@ -96,26 +82,9 @@ class AuthService {
   String _handleErrorResponse(http.Response response) {
     try {
       final errorData = json.decode(response.body);
-      return errorData['message'] ?? _getDefaultErrorMessage(response.statusCode);
+      return errorData['message'] ?? 'Lỗi không xác định';
     } catch (e) {
-      return _getDefaultErrorMessage(response.statusCode);
-    }
-  }
-
-  String _getDefaultErrorMessage(int statusCode) {
-    switch (statusCode) {
-      case 400:
-        return 'Dữ liệu không hợp lệ';
-      case 401:
-        return 'Tài khoản hoặc mật khẩu không chính xác';
-      case 403:
-        return 'Không có quyền truy cập';
-      case 404:
-        return 'Không tìm thấy tài nguyên';
-      case 500:
-        return 'Lỗi máy chủ';
-      default:
-        return 'Đã có lỗi xảy ra (Mã lỗi: $statusCode)';
+      return 'Lỗi máy chủ (Mã lỗi: ${response.statusCode})';
     }
   }
 
@@ -123,10 +92,9 @@ class AuthService {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('auth_token', token);
-      print('Token saved successfully');
+      print('✅ Token saved successfully');
     } catch (e) {
-      print('Error saving token: $e');
-      throw Exception('Không thể lưu token xác thực');
+      print('❌ Error saving token: $e');
     }
   }
 }

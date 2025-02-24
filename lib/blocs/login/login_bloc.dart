@@ -6,43 +6,30 @@ import 'login_state.dart';
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
   final AuthService authService;
 
-  LoginBloc({AuthService? authService})
-      : authService = authService ?? AuthService(),
+  LoginBloc({required AuthService authService})
+      : authService = authService,
         super(LoginInitial()) {
-
     on<LoginButtonPressed>((event, emit) async {
       emit(LoginLoading());
       try {
-        final result = await authService!.login(
+        print('🛠 Đang gửi yêu cầu đăng nhập...');
+
+        final result = await authService.login(
           event.username,
           event.password,
         );
 
-        if (result['success']) {
+        if (result['success'] == true) {
+          print('✅ Đăng nhập thành công');
           emit(LoginSuccess(userData: result['data']));
         } else {
+          print('❌ Lỗi đăng nhập: ${result['message']}');
           emit(LoginFailure(errorMessage: result['message']));
         }
       } catch (e) {
+        print('⚠️ Lỗi kết nối đến máy chủ: $e');
         emit(NetworkError(
-            message: 'Không thể kết nối đến máy chủ. Vui lòng thử lại sau.'
-        ));
-      }
-    });
-
-    on<ForgotPasswordPressed>((event, emit) async {
-      emit(ForgotPasswordLoading());
-      try {
-        final result = await authService!.forgotPassword(event.email);
-
-        if (result['success']) {
-          emit(ForgotPasswordSuccess(message: result['message']));
-        } else {
-          emit(ForgotPasswordFailure(errorMessage: result['message']));
-        }
-      } catch (e) {
-        emit(ForgotPasswordFailure(
-            errorMessage: 'Không thể kết nối đến máy chủ. Vui lòng thử lại sau.'
+          message: 'Không thể kết nối đến máy chủ. Vui lòng thử lại sau.',
         ));
       }
     });

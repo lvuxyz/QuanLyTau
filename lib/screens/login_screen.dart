@@ -4,6 +4,7 @@ import '../blocs/login/login_bloc.dart';
 import '../services/auth_service.dart';
 import '../blocs/login/login_event.dart';
 import '../blocs/login/login_state.dart';
+import '../screens/home_screen.dart'; // Import home screen
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -19,26 +20,53 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => LoginBloc(authService: AuthService()),
-      child: Scaffold(
-        backgroundColor: Colors.black,
-        body: SafeArea(
-          child: SingleChildScrollView(
-            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 48),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildHeader(),
-                SizedBox(height: 40),
-                _buildUsernameField(),
-                SizedBox(height: 20),
-                _buildPasswordField(),
-                SizedBox(height: 16),
-                _buildForgotPassword(),
-                SizedBox(height: 32),
-                _buildLoginButton(),
-                SizedBox(height: 32),
-                _buildRegisterSection(),
-              ],
+      child: BlocListener<LoginBloc, LoginState>(
+        listener: (context, state) {
+          if (state is LoginSuccess) {
+            // Navigate to home screen when login is successful
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => HomeScreen()),
+            );
+          } else if (state is LoginFailure) {
+            // Show error message
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.errorMessage),
+                backgroundColor: Colors.red,
+              ),
+            );
+          } else if (state is NetworkError) {
+            // Show network error message
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        },
+        child: Scaffold(
+          backgroundColor: Colors.black,
+          body: SafeArea(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.symmetric(horizontal: 24, vertical: 48),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildHeader(),
+                  SizedBox(height: 40),
+                  _buildUsernameField(),
+                  SizedBox(height: 20),
+                  _buildPasswordField(),
+                  SizedBox(height: 16),
+                  _buildForgotPassword(),
+                  SizedBox(height: 32),
+                  _buildLoginButton(),
+                  SizedBox(height: 32),
+                  _buildRegisterSection(),
+                ],
+              ),
             ),
           ),
         ),
@@ -119,56 +147,61 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _buildLoginButton() {
     return BlocBuilder<LoginBloc, LoginState>(
       builder: (context, state) {
-        return ElevatedButton(
-          onPressed: state is LoginLoading ? null : () {
-            if (_usernameController.text.isNotEmpty && _passwordController.text.isNotEmpty) {
-              context.read<LoginBloc>().add(
-                LoginButtonPressed(
-                  username: _usernameController.text,
-                  password: _passwordController.text,
-                ),
-              );
-            } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Vui lòng nhập tài khoản và mật khẩu')),
-              );
-            }
-          },
-          style: _buttonStyle(),
-          child: state is LoginLoading
-              ? CircularProgressIndicator(color: Colors.white)
-              : Text('Đăng nhập', style: TextStyle(fontSize: 18)),
-        );
-      },
-    );
-  }
-
-  Widget _buildSocialLogin() {
-    return Column(
-      children: [
-        Row(
-          children: [
-            Expanded(child: Divider(color: Colors.white.withOpacity(0.2))),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Text(
-                'Hoặc đăng nhập với',
-                style: TextStyle(color: Colors.white.withOpacity(0.5)),
+        return Container(
+          width: double.infinity,
+          height: 56,
+          decoration: BoxDecoration(
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF13B8A8).withOpacity(0.3),
+                offset: const Offset(0, 4),
+                blurRadius: 12,
+              ),
+            ],
+          ),
+          child: ElevatedButton(
+            onPressed: state is LoginLoading ? null : () {
+              if (_usernameController.text.isNotEmpty && _passwordController.text.isNotEmpty) {
+                context.read<LoginBloc>().add(
+                  LoginButtonPressed(
+                    username: _usernameController.text,
+                    password: _passwordController.text,
+                  ),
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Vui lòng nhập tài khoản và mật khẩu')),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Color(0xFF13B8A8),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              padding: EdgeInsets.symmetric(vertical: 16),
+            ),
+            child: state is LoginLoading
+                ? SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(
+                color: Colors.white,
+                strokeWidth: 2,
+              ),
+            )
+                : Text(
+              'Đăng nhập',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.5,
               ),
             ),
-            Expanded(child: Divider(color: Colors.white.withOpacity(0.2))),
-          ],
-        ),
-        SizedBox(height: 24),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _buildSocialButton('assets/icons/google.png', () {}),
-            SizedBox(width: 24),
-            _buildSocialButton('assets/icons/facebook.png', () {}),
-          ],
-        ),
-      ],
+          ),
+        );
+      },
     );
   }
 
@@ -182,7 +215,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         TextButton(
           onPressed: () {
-            Navigator.pushNamed(context, '/register');
+            Navigator.pop(context);
           },
           child: Text(
             'Đăng ký ngay',
@@ -203,32 +236,6 @@ class _LoginScreenState extends State<LoginScreen> {
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide.none,
-      ),
-    );
-  }
-
-  ButtonStyle _buttonStyle() {
-    return ElevatedButton.styleFrom(
-      backgroundColor: Color(0xFF13B8A8),
-      padding: EdgeInsets.symmetric(vertical: 16),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-    );
-  }
-
-  Widget _buildSocialButton(String asset, VoidCallback onPressed) {
-    return InkWell(
-      onTap: onPressed,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        width: 56,
-        height: 56,
-        decoration: BoxDecoration(
-          color: Color(0xFF333333),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Center(
-          child: Image.asset(asset, width: 24, height: 24),
-        ),
       ),
     );
   }

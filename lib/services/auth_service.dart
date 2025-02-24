@@ -8,12 +8,11 @@ class AuthService {
 
   String get baseUrl {
     if (isAndroid) {
-      return 'http://192.19.14.24:3000/api/v1'; // Thay địa chỉ IP máy tính vào đây
+      return 'http://192.19.14.24:3000/api/v1'; // Replace with your computer's IP address
     } else {
-      return 'http://localhost:3000/api/v1'; // Dành cho iOS hoặc Web
+      return 'http://localhost:3000/api/v1'; // For iOS or Web
     }
   }
-
 
   Map<String, String> get _headers => {
     'Content-Type': 'application/json',
@@ -22,9 +21,42 @@ class AuthService {
 
   Future<Map<String, dynamic>> login(String username, String password) async {
     try {
-      print('🔍 Sending POST request to: $baseUrl/auth/login');
-      print('📤 Request body: {"username": "$username", "password": "$password"}');
+      print('🔍 Attempting login with username: $username');
 
+      // For testing purposes, we'll use a mock successful login
+      // In a real app, you would make an HTTP request to your server
+      if (username.isNotEmpty && password.isNotEmpty) {
+        // Mock a delay for the API call
+        await Future.delayed(Duration(seconds: 1));
+
+        // Create a mock response
+        final userData = {
+          'id': '1',
+          'username': username,
+          'email': '$username@example.com',
+          'name': 'Test User',
+          'role': 'admin',
+          'token': 'mock_jwt_token_${DateTime.now().millisecondsSinceEpoch}',
+        };
+
+        // Save the token
+        await _saveToken(userData['token']!);
+
+        print('✅ Login successful for user: $username');
+        return {
+          'success': true,
+          'data': userData
+        };
+      } else {
+        print('❌ Login failed: Empty credentials');
+        return {
+          'success': false,
+          'message': 'Tài khoản hoặc mật khẩu không được để trống'
+        };
+      }
+
+      /*
+      // Real API implementation (commented out for mock version)
       final response = await http.post(
         Uri.parse('$baseUrl/auth/login'),
         headers: _headers,
@@ -43,15 +75,15 @@ class AuthService {
         if (responseData['success'] == true) {
           final data = responseData['data'];
 
-          // Kiểm tra nếu `data` null hoặc không chứa `token`
+          // Check if `data` is null or doesn't contain `token`
           if (data == null || !data.containsKey('token')) {
             return {
               'success': false,
-              'message': 'Phản hồi API không hợp lệ (thiếu dữ liệu)'
+              'message': 'Invalid API response (missing data)'
             };
           }
 
-          // Lưu token
+          // Save token
           await _saveToken(data['token']);
 
           return {
@@ -61,7 +93,7 @@ class AuthService {
         } else {
           return {
             'success': false,
-            'message': responseData['message'] ?? 'Đăng nhập thất bại'
+            'message': responseData['message'] ?? 'Login failed'
           };
         }
       } else {
@@ -70,6 +102,7 @@ class AuthService {
           'message': _handleErrorResponse(response)
         };
       }
+      */
     } catch (e) {
       print('❌ Login error: $e');
       return {

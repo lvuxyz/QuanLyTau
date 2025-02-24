@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shipmanagerapp/widgets/home/custom_bottom_nav_bar.dart';
 import '../blocs/search/search_bloc.dart';
-import '../blocs/search/search_event.dart';
 import '../blocs/search/search_state.dart';
-import '../widgets/home/custom_bottom_nav_bar.dart';
 import '../widgets/search/search_header.dart';
 import '../widgets/search/custom_search_bar.dart'; // Renamed import
 import '../widgets/search/search_results.dart';

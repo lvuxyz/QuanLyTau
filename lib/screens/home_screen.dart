@@ -5,11 +5,9 @@ import 'package:shipmanagerapp/widgets/home/custom_bottom_nav_bar.dart';
 import '../blocs/home/home_bloc.dart';
 import '../blocs/home/home_event.dart';
 import '../blocs/home/home_state.dart';
-import '../widgets/home/custom_app_bar.dart';
 import '../widgets/home/promotion_cards_section.dart';
 import '../widgets/home/ships_section.dart';
 import '../widgets/home/promotion_section.dart';
-import '../widgets/home/custom_bottom_nav_bar.dart';
 
 class HomeScreen extends StatelessWidget {
   @override

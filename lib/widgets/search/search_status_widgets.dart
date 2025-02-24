@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
-class SearchLoading extends StatelessWidget {
-  const SearchLoading({Key? key}) : super(key: key);
+// Renamed from SearchLoading to SearchLoadingWidget to avoid conflict
+class SearchLoadingWidget extends StatelessWidget {
+  const SearchLoadingWidget({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -13,10 +14,11 @@ class SearchLoading extends StatelessWidget {
   }
 }
 
-class SearchEmpty extends StatelessWidget {
+// Renamed from SearchEmpty to SearchEmptyWidget to avoid conflict
+class SearchEmptyWidget extends StatelessWidget {
   final String query;
 
-  const SearchEmpty({
+  const SearchEmptyWidget({
     Key? key,
     required this.query,
   }) : super(key: key);
@@ -47,10 +49,11 @@ class SearchEmpty extends StatelessWidget {
   }
 }
 
-class SearchError extends StatelessWidget {
+// Renamed from SearchError to SearchErrorWidget to avoid conflict
+class SearchErrorWidget extends StatelessWidget {
   final String errorMessage;
 
-  const SearchError({
+  const SearchErrorWidget({
     Key? key,
     required this.errorMessage,
   }) : super(key: key);

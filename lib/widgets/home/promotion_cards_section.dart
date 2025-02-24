@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shipmanagerapp/widgets/home/promotion_card.dart';
 import 'section_header.dart';
-import 'promotion_card.dart';
 
 class PromotionCardsSection extends StatelessWidget {
   @override

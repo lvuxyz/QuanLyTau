@@ -1,6 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:shipmanagerapp/screens/home_screen.dart';
+import 'package:shipmanagerapp/screens/search_screen.dart';
 
 class CustomBottomNavBar extends StatelessWidget {
+  final int currentIndex;
+
+  const CustomBottomNavBar({
+    Key? key,
+    required this.currentIndex,
+  }) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -20,26 +29,44 @@ class CustomBottomNavBar extends StatelessWidget {
           NavBarItem(
             icon: Icons.home_filled,
             label: "Trang chủ",
-            isActive: true,
-            onTap: () {},
+            isActive: currentIndex == 0,
+            onTap: () {
+              if (currentIndex != 0) {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => HomeScreen()),
+                );
+              }
+            },
           ),
           NavBarItem(
             icon: Icons.search,
             label: "Tìm kiếm",
-            isActive: false,
-            onTap: () {},
+            isActive: currentIndex == 1,
+            onTap: () {
+              if (currentIndex != 1) {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => SearchScreen()),
+                );
+              }
+            },
           ),
           NavBarItem(
             icon: Icons.directions_boat_outlined,
             label: "Vé",
-            isActive: false,
-            onTap: () {},
+            isActive: currentIndex == 2,
+            onTap: () {
+              // To be implemented
+            },
           ),
           NavBarItem(
             icon: Icons.person_outline,
             label: "Profile",
-            isActive: false,
-            onTap: () {},
+            isActive: currentIndex == 3,
+            onTap: () {
+              // To be implemented
+            },
           ),
         ],
       ),

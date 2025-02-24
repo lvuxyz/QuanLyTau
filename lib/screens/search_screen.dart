@@ -4,7 +4,6 @@ import '../blocs/search/search_bloc.dart';
 import '../blocs/search/search_event.dart';
 import '../blocs/search/search_state.dart';
 import '../widgets/home/custom_bottom_nav_bar.dart';
-import 'home_screen.dart';
 
 class SearchScreen extends StatefulWidget {
   @override
@@ -41,8 +40,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         ),
                       );
                     } else if (state is SearchLoaded) {
-                      // This would display search results, but in the image it's not showing any results
-                      return Container(color: Colors.black);
+                      return _buildSearchResults(state.results);
                     } else if (state is SearchEmpty) {
                       return Center(
                         child: Text(
@@ -58,16 +56,17 @@ class _SearchScreenState extends State<SearchScreen> {
                         ),
                       );
                     } else {
-                      // Initial state - empty black background as shown in the image
+                      // Initial state - empty black background
                       return Container(color: Colors.black);
                     }
                   },
                 ),
               ),
-              _buildBottomNavBar(context),
             ],
           ),
         ),
+        // Pass currentIndex 1 to indicate Search is active
+        bottomNavigationBar: CustomBottomNavBar(currentIndex: 1),
       ),
     );
   }
@@ -159,18 +158,43 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
-  Widget _buildBottomNavBar(BuildContext context) {
-    return CustomBottomNavBar(
-      currentIndex: 1, // Search tab is active
-      onTap: (index) {
-        if (index == 0) {
-          // Navigate to Home
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => HomeScreen()),
-          );
-        }
-        // Add other navigation actions for index 2 (Tickets) and 3 (Profile)
+  Widget _buildSearchResults(List<Map<String, dynamic>> results) {
+    return ListView.builder(
+      padding: EdgeInsets.all(16),
+      itemCount: results.length,
+      itemBuilder: (context, index) {
+        final item = results[index];
+        return Card(
+          color: Color(0xFF333333),
+          margin: EdgeInsets.only(bottom: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: ListTile(
+            contentPadding: EdgeInsets.all(16),
+            title: Text(
+              item['name'] ?? '',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            subtitle: Text(
+              item['route'] ?? '',
+              style: TextStyle(
+                color: Colors.white70,
+              ),
+            ),
+            trailing: Icon(
+              Icons.arrow_forward_ios,
+              color: Color(0xFF13B8A8),
+              size: 16,
+            ),
+            onTap: () {
+              // Handle ship selection
+            },
+          ),
+        );
       },
     );
   }

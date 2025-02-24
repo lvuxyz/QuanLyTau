@@ -1,27 +1,41 @@
 import 'package:flutter/material.dart';
-import '../../blocs/home/home_state.dart';
+import 'section_header.dart';
+import 'promotion_item.dart';
 
-class PromotionSection extends StatelessWidget {
-  final HomeState state;
-
-  const PromotionSection({super.key, required this.state});
-
+class PromotionsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    if (state is! HomeLoaded) {
-      return SizedBox.shrink();
-    }
-
-    final homeState = state as HomeLoaded;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: homeState.promotions.map((promo) {
-        return Text(
-          promo['title'],
-          style: TextStyle(color: Colors.white, fontSize: 18),
-        );
-      }).toList(),
+      children: [
+        // Section header with view all button
+        SectionHeader(
+          title: "Khuyến mãi",
+          showViewAll: true,
+          onViewAllPressed: () {
+            // Navigate to promotions list screen
+          },
+        ),
+        SizedBox(height: 12),
+
+        // Promotion items in a row
+        Row(
+          children: [
+            PromotionItem(
+              width: 80,
+              height: 80,
+              isSquare: true,
+            ),
+            SizedBox(width: 16),
+            Expanded(
+              child: PromotionItem(
+                height: 80,
+                isSquare: false,
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

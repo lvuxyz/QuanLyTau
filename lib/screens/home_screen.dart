@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shipmanagerapp/widgets/home/custom_app_bar.dart';
+import 'package:shipmanagerapp/widgets/home/custom_bottom_nav_bar.dart';
 import '../blocs/home/home_bloc.dart';
 import '../blocs/home/home_event.dart';
 import '../blocs/home/home_state.dart';

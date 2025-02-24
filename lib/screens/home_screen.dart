@@ -1,11 +1,9 @@
-// lib/screens/home_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../blocs/home/home_bloc.dart';
 import '../blocs/home/home_event.dart';
 import '../blocs/home/home_state.dart';
 
-// Rest of the HomeScreen implementation remains the same...
 class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -16,6 +14,43 @@ class HomeScreen extends StatelessWidget {
         body: SafeArea(
           child: BlocBuilder<HomeBloc, HomeState>(
             builder: (context, state) {
+              if (state is HomeLoading) {
+                return Center(
+                  child: CircularProgressIndicator(
+                    color: const Color(0xFF13B8A8),
+                  ),
+                );
+              } else if (state is HomeError) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.error_outline,
+                        color: Colors.red,
+                        size: 60,
+                      ),
+                      SizedBox(height: 16),
+                      Text(
+                        state.message,
+                        style: TextStyle(color: Colors.white),
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: () {
+                          context.read<HomeBloc>().add(LoadHomeData());
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF13B8A8),
+                        ),
+                        child: Text('Thử lại'),
+                      ),
+                    ],
+                  ),
+                );
+              }
+
               return CustomScrollView(
                 slivers: [
                   _buildAppBar(),
@@ -138,183 +173,175 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildPromotionSection(HomeState state) {
-    if (state is HomeLoading) {
-      return Center(child: CircularProgressIndicator());
+    if (state is! HomeLoaded) {
+      return SizedBox.shrink();
     }
 
-    if (state is HomeLoaded) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Các chuyến tàu mới',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Các chuyến tàu mới',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
           ),
-          const SizedBox(height: 16),
-          Container(
-            height: 180,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: state.promotions.length,
-              itemBuilder: (context, index) {
-                final promotion = state.promotions[index];
-                return Container(
-                  width: 280,
-                  margin: EdgeInsets.only(right: 16),
-                  decoration: BoxDecoration(
-                    color: Color(0xFF222222),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Stack(
-                    children: [
-                      Positioned(
-                        right: -20,
-                        bottom: -20,
-                        child: Icon(
-                          Icons.directions_boat,
-                          size: 120,
-                          color: Colors.white.withOpacity(0.1),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              promotion['title'],
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Giảm ${promotion['discount']}',
-                              style: TextStyle(
-                                color: const Color(0xFF13B8A8),
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      );
-    }
-
-    return SizedBox.shrink();
-  }
-
-  Widget _buildRecentShipsSection(HomeState state) {
-    if (state is HomeLoading) {
-      return Center(child: CircularProgressIndicator());
-    }
-
-    if (state is HomeLoaded) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Khuyến mãi',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              TextButton(
-                onPressed: () {},
-                child: Text(
-                  'Xem tất cả',
-                  style: TextStyle(
-                    color: const Color(0xFF13B8A8),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          ListView.builder(
-            shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
-            itemCount: state.recentShips.length,
+        ),
+        const SizedBox(height: 16),
+        Container(
+          height: 180,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: state.promotions.length,
             itemBuilder: (context, index) {
-              final ship = state.recentShips[index];
+              final promotion = state.promotions[index];
               return Container(
-                margin: EdgeInsets.only(bottom: 16),
-                padding: EdgeInsets.all(16),
+                width: 280,
+                margin: EdgeInsets.only(right: 16),
                 decoration: BoxDecoration(
                   color: Color(0xFF222222),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
                 ),
-                child: Row(
+                child: Stack(
                   children: [
-                    Container(
-                      padding: EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF13B8A8).withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                    Positioned(
+                      right: -20,
+                      bottom: -20,
                       child: Icon(
                         Icons.directions_boat,
-                        color: const Color(0xFF13B8A8),
+                        size: 120,
+                        color: Colors.white.withOpacity(0.1),
                       ),
                     ),
-                    const SizedBox(width: 16),
-                    Expanded(
+                    Padding(
+                      padding: const EdgeInsets.all(16),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            ship['name'],
+                            promotion['title'],
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 16,
+                              fontSize: 18,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: 8),
                           Text(
-                            ship['status'],
+                            'Giảm ${promotion['discount']}',
                             style: TextStyle(
-                              color: Colors.white.withOpacity(0.7),
-                              fontSize: 14,
+                              color: const Color(0xFF13B8A8),
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ],
                       ),
-                    ),
-                    Icon(
-                      Icons.arrow_forward_ios,
-                      color: Colors.white.withOpacity(0.5),
-                      size: 16,
                     ),
                   ],
                 ),
               );
             },
           ),
-        ],
-      );
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRecentShipsSection(HomeState state) {
+    if (state is! HomeLoaded) {
+      return SizedBox.shrink();
     }
 
-    return SizedBox.shrink();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Khuyến mãi',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            TextButton(
+              onPressed: () {},
+              child: Text(
+                'Xem tất cả',
+                style: TextStyle(
+                  color: const Color(0xFF13B8A8),
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        ListView.builder(
+          shrinkWrap: true,
+          physics: NeverScrollableScrollPhysics(),
+          itemCount: state.recentShips.length,
+          itemBuilder: (context, index) {
+            final ship = state.recentShips[index];
+            return Container(
+              margin: EdgeInsets.only(bottom: 16),
+              padding: EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Color(0xFF222222),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF13B8A8).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      Icons.directions_boat,
+                      color: const Color(0xFF13B8A8),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          ship['name'],
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          ship['status'],
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.7),
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    Icons.arrow_forward_ios,
+                    color: Colors.white.withOpacity(0.5),
+                    size: 16,
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ],
+    );
   }
 
   Widget _buildBottomNavBar() {

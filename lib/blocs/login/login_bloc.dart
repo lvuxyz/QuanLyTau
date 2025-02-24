@@ -6,9 +6,7 @@ import 'login_state.dart';
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
   final AuthService authService;
 
-  LoginBloc({required AuthService authService})
-      : authService = authService,
-        super(LoginInitial()) {
+  LoginBloc({required this.authService}) : super(LoginInitial()) {
     on<LoginButtonPressed>((event, emit) async {
       emit(LoginLoading());
       try {

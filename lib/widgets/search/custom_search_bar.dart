@@ -4,10 +4,11 @@ import '../../blocs/search/search_bloc.dart';
 import '../../blocs/search/search_event.dart';
 import '../../blocs/search/search_state.dart';
 
-class SearchBar extends StatelessWidget {
+// Renamed from SearchBar to CustomSearchBar to avoid conflict with Flutter's SearchBar
+class CustomSearchBar extends StatelessWidget {
   final TextEditingController controller;
 
-  const SearchBar({
+  const CustomSearchBar({
     Key? key,
     required this.controller,
   }) : super(key: key);

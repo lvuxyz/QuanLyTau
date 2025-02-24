@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shipmanagerapp/widgets/home/custom_bottom_nav_bar.dart';
 import '../blocs/search/search_bloc.dart';
 import '../blocs/search/search_event.dart';
 import '../blocs/search/search_state.dart';
 import '../widgets/home/custom_bottom_nav_bar.dart';
 import '../widgets/search/search_header.dart';
-import '../widgets/search/search_bar.dart';
+import '../widgets/search/custom_search_bar.dart'; // Renamed import
 import '../widgets/search/search_results.dart';
-import '../widgets/search/search_status.dart';
+import '../widgets/search/search_status_widgets.dart'; // Renamed import
 
 class SearchScreen extends StatefulWidget {
   @override
@@ -36,20 +37,20 @@ class _SearchScreenState extends State<SearchScreen> {
               SearchHeader(),
 
               // Search bar widget
-              SearchBar(controller: _searchController),
+              CustomSearchBar(controller: _searchController), // Renamed widget
 
               // Search results or status widgets
               Expanded(
                 child: BlocBuilder<SearchBloc, SearchState>(
                   builder: (context, state) {
                     if (state is SearchLoading) {
-                      return SearchLoading();
+                      return SearchLoadingWidget(); // Renamed widget
                     } else if (state is SearchLoaded) {
                       return SearchResults(results: state.results);
                     } else if (state is SearchEmpty) {
-                      return SearchEmpty(query: state.query);
+                      return SearchEmptyWidget(query: state.query); // Renamed widget
                     } else if (state is SearchError) {
-                      return SearchError(errorMessage: state.errorMessage);
+                      return SearchErrorWidget(errorMessage: state.errorMessage); // Renamed widget
                     } else {
                       // Initial state - empty black background
                       return Container(color: Colors.black);
@@ -60,8 +61,8 @@ class _SearchScreenState extends State<SearchScreen> {
             ],
           ),
         ),
-        // Pass currentIndex 1 to indicate Search is active
-        bottomNavigationBar: CustomBottomNavBar(currentIndex: 1),
+        // Bottom navigation bar
+        bottomNavigationBar: const CustomBottomNavBar(currentIndex: 1),
       ),
     );
   }

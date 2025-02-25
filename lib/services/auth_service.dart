@@ -7,10 +7,10 @@ class AuthService {
   bool get isAndroid => Platform.isAndroid;
 
   String get baseUrl {
-    if (isAndroid) {
-      return 'http://192.19.14.24:3000/api/v1'; // Replace with your computer's IP address
+    if (Platform.isAndroid) {
+      return 'http://192.19.14.24:3000/api/v1'; // Sử dụng địa chỉ IP thực tế của máy tính trong mạng WiFi
     } else {
-      return 'http://localhost:3000/api/v1'; // For iOS or Web
+      return 'http://localhost:3000/api/v1'; // Cho iOS hoặc Web
     }
   }
 
@@ -21,42 +21,9 @@ class AuthService {
 
   Future<Map<String, dynamic>> login(String username, String password) async {
     try {
-      print('🔍 Attempting login with username: $username');
+      print('🔍 Đang thử đăng nhập với tên người dùng: $username');
 
-      // For testing purposes, we'll use a mock successful login
-      // In a real app, you would make an HTTP request to your server
-      if (username.isNotEmpty && password.isNotEmpty) {
-        // Mock a delay for the API call
-        await Future.delayed(Duration(seconds: 1));
-
-        // Create a mock response
-        final userData = {
-          'id': '1',
-          'username': username,
-          'email': '$username@example.com',
-          'name': 'Test User',
-          'role': 'admin',
-          'token': 'mock_jwt_token_${DateTime.now().millisecondsSinceEpoch}',
-        };
-
-        // Save the token
-        await _saveToken(userData['token']!);
-
-        print('✅ Login successful for user: $username');
-        return {
-          'success': true,
-          'data': userData
-        };
-      } else {
-        print('❌ Login failed: Empty credentials');
-        return {
-          'success': false,
-          'message': 'Tài khoản hoặc mật khẩu không được để trống'
-        };
-      }
-
-      /*
-      // Real API implementation (commented out for mock version)
+      // Gửi yêu cầu HTTP đến máy chủ
       final response = await http.post(
         Uri.parse('$baseUrl/auth/login'),
         headers: _headers,
@@ -66,8 +33,8 @@ class AuthService {
         }),
       );
 
-      print('📥 Response status: ${response.statusCode}');
-      print('📥 Response body: ${response.body}');
+      print('📥 Trạng thái phản hồi: ${response.statusCode}');
+      print('📥 Nội dung phản hồi: ${response.body}');
 
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
@@ -75,15 +42,15 @@ class AuthService {
         if (responseData['success'] == true) {
           final data = responseData['data'];
 
-          // Check if `data` is null or doesn't contain `token`
+          // Kiểm tra nếu `data` là null hoặc không chứa `token`
           if (data == null || !data.containsKey('token')) {
             return {
               'success': false,
-              'message': 'Invalid API response (missing data)'
+              'message': 'Phản hồi API không hợp lệ (thiếu dữ liệu)'
             };
           }
 
-          // Save token
+          // Lưu token
           await _saveToken(data['token']);
 
           return {
@@ -93,7 +60,7 @@ class AuthService {
         } else {
           return {
             'success': false,
-            'message': responseData['message'] ?? 'Login failed'
+            'message': responseData['message'] ?? 'Đăng nhập thất bại'
           };
         }
       } else {
@@ -102,12 +69,36 @@ class AuthService {
           'message': _handleErrorResponse(response)
         };
       }
+
+      // Giữ lại hệ thống giả lập như fallback cho trường hợp máy chủ không hoạt động
+      /*
+      if (username.isNotEmpty && password.isNotEmpty) {
+        await Future.delayed(Duration(seconds: 1));
+        final userData = {
+          'id': '1',
+          'username': username,
+          'email': '$username@example.com',
+          'name': 'Test User',
+          'role': 'admin',
+          'token': 'mock_jwt_token_${DateTime.now().millisecondsSinceEpoch}',
+        };
+        await _saveToken(userData['token']!);
+        return {
+          'success': true,
+          'data': userData
+        };
+      } else {
+        return {
+          'success': false,
+          'message': 'Tài khoản hoặc mật khẩu không được để trống'
+        };
+      }
       */
     } catch (e) {
-      print('❌ Login error: $e');
+      print('❌ Lỗi đăng nhập: $e');
       return {
         'success': false,
-        'message': 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra mạng'
+        'message': 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng'
       };
     }
   }
@@ -125,9 +116,9 @@ class AuthService {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('auth_token', token);
-      print('✅ Token saved successfully');
+      print('✅ Token đã được lưu thành công');
     } catch (e) {
-      print('❌ Error saving token: $e');
+      print('❌ Lỗi khi lưu token: $e');
     }
   }
 }

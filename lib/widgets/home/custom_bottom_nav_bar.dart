@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shipmanagerapp/screens/home_screen.dart';
 import 'package:shipmanagerapp/screens/search_screen.dart';
+import 'package:shipmanagerapp/screens/ticket_screen.dart';
 
 class CustomBottomNavBar extends StatelessWidget {
   final int currentIndex;
@@ -57,7 +58,10 @@ class CustomBottomNavBar extends StatelessWidget {
             label: "Vé",
             isActive: currentIndex == 2,
             onTap: () {
-              // To be implemented
+              Navigator.pushReplacement(
+              context,
+                  MaterialPageRoute(builder: (context) => TicketScreen()),
+              );
             },
           ),
           NavBarItem(

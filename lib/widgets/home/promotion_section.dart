@@ -3,6 +3,13 @@ import 'section_header.dart';
 import 'promotion_item.dart';
 
 class PromotionsSection extends StatelessWidget {
+  final List<Map<String, dynamic>> promotions;
+
+  const PromotionsSection({
+    Key? key,
+    required this.promotions,
+  }) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -25,12 +32,14 @@ class PromotionsSection extends StatelessWidget {
               width: 80,
               height: 80,
               isSquare: true,
+              promotionData: promotions.isNotEmpty ? promotions[0] : null,
             ),
             SizedBox(width: 16),
             Expanded(
               child: PromotionItem(
                 height: 80,
                 isSquare: false,
+                promotionData: promotions.length > 1 ? promotions[1] : null,
               ),
             ),
           ],

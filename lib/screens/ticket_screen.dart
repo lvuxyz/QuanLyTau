@@ -1,4 +1,3 @@
-// lib/screens/ticket_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../blocs/ticket/ticket_bloc.dart';
@@ -12,8 +11,12 @@ class TicketScreen extends StatefulWidget {
   _TicketScreenState createState() => _TicketScreenState();
 }
 
-class _TicketScreenState extends State<TicketScreen> with SingleTickerProviderStateMixin {
+class _TicketScreenState extends State<TicketScreen> with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   late TabController _tabController;
+  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -29,79 +32,38 @@ class _TicketScreenState extends State<TicketScreen> with SingleTickerProviderSt
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => TicketBloc()..add(LoadTickets()),
-      child: Scaffold(
+    super.build(context);
+
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
         backgroundColor: Colors.black,
-        appBar: AppBar(
-          backgroundColor: Colors.black,
-          elevation: 0,
-          title: _buildHeader(),
-          actions: [
-            IconButton(
-              icon: Icon(Icons.notifications_none, color: Colors.white),
-              onPressed: () {},
-            ),
-          ],
-        ),
-        body: Column(
-          children: [
-            _buildTabBar(),
-            Expanded(
-              child: BlocBuilder<TicketBloc, TicketState>(
-                builder: (context, state) {
-                  if (state is TicketLoading) {
-                    return Center(
-                      child: CircularProgressIndicator(
-                        color: const Color(0xFF13B8A8),
-                      ),
-                    );
-                  } else if (state is TicketLoaded) {
-                    return TabBarView(
-                      controller: _tabController,
-                      children: [
-                        // Đã đặt tab
-                        _buildTicketList(
-                          context: context,
-                          tickets: state.bookedTickets,
-                          statusColor: const Color(0xFF13B8A8),
-                          emptyMessage: 'Bạn chưa có vé nào đã đặt',
-                        ),
-
-                        // Hoàn thành tab
-                        _buildTicketList(
-                          context: context,
-                          tickets: state.completedTickets,
-                          statusColor: Colors.blue,
-                          emptyMessage: 'Bạn chưa có vé nào đã hoàn thành',
-                        ),
-
-                        // Đã hủy tab
-                        _buildTicketList(
-                          context: context,
-                          tickets: state.canceledTickets,
-                          statusColor: Colors.red,
-                          emptyMessage: 'Bạn chưa có vé nào đã hủy',
-                        ),
-                      ],
-                    );
-                  } else if (state is TicketError) {
-                    return Center(
-                      child: Text(
-                        state.message,
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    );
-                  } else {
-                    return Container();
-                  }
-                },
-              ),
-            ),
-          ],
-        ),
-        bottomNavigationBar: CustomBottomNavBar(currentIndex: 2),
+        elevation: 0,
+        title: _buildHeader(),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.notifications_none, color: Colors.white),
+            onPressed: () {},
+          ),
+        ],
       ),
+      body: BlocBuilder<TicketBloc, TicketState>(
+        builder: (context, state) {
+          if (state is TicketInitial) {
+            context.read<TicketBloc>().add(LoadTickets());
+            return _buildLoadingView();
+          } else if (state is TicketLoading) {
+            return _buildLoadingView();
+          } else if (state is TicketLoaded) {
+            return _buildLoadedView(state);
+          } else if (state is TicketError) {
+            return _buildErrorView(state.message);
+          }
+
+          return _buildLoadingView();
+        },
+      ),
+      bottomNavigationBar: const CustomBottomNavBar(currentIndex: 2),
     );
   }
 
@@ -183,6 +145,114 @@ class _TicketScreenState extends State<TicketScreen> with SingleTickerProviderSt
     );
   }
 
+  Widget _buildLoadingView() {
+    return Column(
+      children: [
+        _buildTabBar(),
+        Expanded(
+          child: Center(
+            child: CircularProgressIndicator(
+              color: const Color(0xFF13B8A8),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildErrorView(String message) {
+    return Column(
+      children: [
+        _buildTabBar(),
+        Expanded(
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.error_outline,
+                  color: Colors.red,
+                  size: 48,
+                ),
+                SizedBox(height: 16),
+                Text(
+                  message,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 24),
+                ElevatedButton(
+                  onPressed: () {
+                    context.read<TicketBloc>().add(LoadTickets());
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF13B8A8),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  ),
+                  child: Text('Thử lại'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLoadedView(TicketLoaded state) {
+    return Column(
+      children: [
+        _buildTabBar(),
+        Expanded(
+          child: RefreshIndicator(
+            key: _refreshIndicatorKey,
+            color: const Color(0xFF13B8A8),
+            backgroundColor: Color(0xFF333333),
+            onRefresh: () async {
+              context.read<TicketBloc>().add(RefreshTickets());
+              return await Future.delayed(Duration(milliseconds: 800));
+            },
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                // Đã đặt tab
+                _buildTicketList(
+                  context: context,
+                  tickets: state.bookedTickets,
+                  statusColor: const Color(0xFF13B8A8),
+                  emptyMessage: 'Bạn chưa có vé nào đã đặt',
+                ),
+
+                // Hoàn thành tab
+                _buildTicketList(
+                  context: context,
+                  tickets: state.completedTickets,
+                  statusColor: Colors.blue,
+                  emptyMessage: 'Bạn chưa có vé nào đã hoàn thành',
+                ),
+
+                // Đã hủy tab
+                _buildTicketList(
+                  context: context,
+                  tickets: state.canceledTickets,
+                  statusColor: Colors.red,
+                  emptyMessage: 'Bạn chưa có vé nào đã hủy',
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildTicketList({
     required BuildContext context,
     required List<Map<String, dynamic>> tickets,
@@ -204,51 +274,85 @@ class _TicketScreenState extends State<TicketScreen> with SingleTickerProviderSt
     return ListView.builder(
       padding: EdgeInsets.all(16),
       itemCount: tickets.length,
+      // Optimize list rendering
+      addAutomaticKeepAlives: true,
+      cacheExtent: 300,
+      physics: AlwaysScrollableScrollPhysics(),
       itemBuilder: (context, index) {
         final ticket = tickets[index];
-        return TicketItem(
-          ticket: ticket,
-          statusColor: statusColor,
-          onCancelPressed: ticket['status'] == 'đã đặt'
-              ? () {
-            // Show confirmation dialog
-            showDialog(
-              context: context,
-              builder: (context) => AlertDialog(
-                backgroundColor: Color(0xFF333333),
-                title: Text(
-                  'Xác nhận hủy vé',
-                  style: TextStyle(color: Colors.white),
-                ),
-                content: Text(
-                  'Bạn có chắc chắn muốn hủy vé này không?',
-                  style: TextStyle(color: Colors.white.withOpacity(0.7)),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: Text(
-                      'Hủy',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      context.read<TicketBloc>().add(CancelTicket(ticket['id']));
-                    },
-                    child: Text(
-                      'Xác nhận',
-                      style: TextStyle(color: Color(0xFF13B8A8)),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }
-              : null,
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 16),
+          child: KeepAliveWrapper(
+            child: TicketItem(
+              ticket: ticket,
+              statusColor: statusColor,
+              onCancelPressed: ticket['status'] == 'đã đặt'
+                  ? () => _showCancelConfirmation(context, ticket['id'])
+                  : null,
+              onTap: () {
+                // Show ticket details
+              },
+            ),
+          ),
         );
       },
     );
+  }
+
+  void _showCancelConfirmation(BuildContext context, String ticketId) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Color(0xFF333333),
+        title: Text(
+          'Xác nhận hủy vé',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: Text(
+          'Bạn có chắc chắn muốn hủy vé này không?',
+          style: TextStyle(color: Colors.white.withOpacity(0.7)),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(
+              'Hủy',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              context.read<TicketBloc>().add(CancelTicket(ticketId));
+            },
+            child: Text(
+              'Xác nhận',
+              style: TextStyle(color: Color(0xFF13B8A8)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// Helper widget to keep list items alive
+class KeepAliveWrapper extends StatefulWidget {
+  final Widget child;
+
+  const KeepAliveWrapper({Key? key, required this.child}) : super(key: key);
+
+  @override
+  _KeepAliveWrapperState createState() => _KeepAliveWrapperState();
+}
+
+class _KeepAliveWrapperState extends State<KeepAliveWrapper> with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return widget.child;
   }
 }

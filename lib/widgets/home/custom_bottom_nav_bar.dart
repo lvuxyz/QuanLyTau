@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shipmanagerapp/screens/home_screen.dart';
 import 'package:shipmanagerapp/screens/search_screen.dart';
 import 'package:shipmanagerapp/screens/ticket_screen.dart';
+import 'package:shipmanagerapp/utils/custom_route.dart';
 
 class CustomBottomNavBar extends StatelessWidget {
   final int currentIndex;
@@ -23,6 +24,13 @@ class CustomBottomNavBar extends StatelessWidget {
             width: 0.5,
           ),
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 4,
+            offset: Offset(0, -2),
+          ),
+        ],
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -35,7 +43,7 @@ class CustomBottomNavBar extends StatelessWidget {
               if (currentIndex != 0) {
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => HomeScreen()),
+                  FadePageRoute(page: HomeScreen()),
                 );
               }
             },
@@ -48,7 +56,12 @@ class CustomBottomNavBar extends StatelessWidget {
               if (currentIndex != 1) {
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => SearchScreen()),
+                  SlidePageRoute(
+                    page: SearchScreen(),
+                    direction: currentIndex < 1
+                        ? SlideDirection.fromRight
+                        : SlideDirection.fromLeft,
+                  ),
                 );
               }
             },
@@ -58,10 +71,17 @@ class CustomBottomNavBar extends StatelessWidget {
             label: "Vé",
             isActive: currentIndex == 2,
             onTap: () {
-              Navigator.pushReplacement(
-              context,
-                  MaterialPageRoute(builder: (context) => TicketScreen()),
-              );
+              if (currentIndex != 2) {
+                Navigator.pushReplacement(
+                  context,
+                  SlidePageRoute(
+                    page: TicketScreen(),
+                    direction: currentIndex < 2
+                        ? SlideDirection.fromRight
+                        : SlideDirection.fromLeft,
+                  ),
+                );
+              }
             },
           ),
           NavBarItem(
@@ -96,21 +116,31 @@ class NavBarItem extends StatelessWidget {
   Widget build(BuildContext context) {
     Color color = isActive ? Color(0xFF13B8A8) : Colors.grey;
 
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, color: color, size: 24),
-          SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              color: color,
-              fontSize: 12,
-            ),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        splashColor: Color(0xFF13B8A8).withOpacity(0.1),
+        highlightColor: Colors.transparent,
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, color: color, size: 24),
+              SizedBox(height: 4),
+              Text(
+                label,
+                style: TextStyle(
+                  color: color,
+                  fontSize: 12,
+                  fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

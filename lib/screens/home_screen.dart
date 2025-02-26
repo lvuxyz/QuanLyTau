@@ -1,16 +1,18 @@
+// lib/screens/home_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../blocs/home/home_bloc.dart';
-import '../blocs/home/home_event.dart';
-import '../blocs/home/home_state.dart';
+import 'package:shipmanagerapp/blocs/home/home_bloc.dart';
+import 'package:shipmanagerapp/blocs/home/home_event.dart';
+import 'package:shipmanagerapp/blocs/home/home_state.dart';
 import '../widgets/home/custom_app_bar.dart';
 import '../widgets/home/custom_bottom_nav_bar.dart';
-import '../widgets/home/promotion_cards_section.dart';
-import '../widgets/home/ships_section.dart';
-import '../widgets/home/promotion_section.dart';
+import '../widgets/home/trains_section.dart';
+import '../widgets/home/schedules_section.dart';
+import '../widgets/home/stations_section.dart';
 import '../utils/custom_route.dart';
-import '../screens/search_screen.dart';
-import '../screens/ticket_screen.dart';
+import '../screens/schedule_screen.dart';
+import '../screens/station_screen.dart';
+import '../screens/train_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -26,15 +28,6 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
   bool get wantKeepAlive => true;
 
   @override
-  void initState() {
-    super.initState();
-    // Preload the search and ticket screens in the background
-    Future.microtask(() {
-      precacheImage(AssetImage('assets/images/user_avatar.png'), context);
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
     super.build(context);
 
@@ -47,13 +40,11 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
           backgroundColor: Color(0xFF333333),
           onRefresh: () async {
             context.read<HomeBloc>().add(RefreshHomeData());
-            // Wait for state to complete refresh
             return await Future.delayed(Duration(milliseconds: 800));
           },
           child: BlocBuilder<HomeBloc, HomeState>(
             builder: (context, state) {
               if (state is HomeInitial) {
-                // Trigger initial data load
                 context.read<HomeBloc>().add(LoadHomeData());
                 return _buildLoadingView();
               } else if (state is HomeLoading) {
@@ -64,7 +55,6 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                 return _buildLoadedView(state);
               }
 
-              // Default fallback
               return _buildLoadingView();
             },
           ),
@@ -141,41 +131,51 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
     return CustomScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
       slivers: [
-        // Custom App Bar
         CustomAppBar(),
-
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Promotion Cards Section
-                PromotionCardsSection(
-                  promotions: state.promotions,
-                ),
-
-                SizedBox(height: 24),
-
-                // Ships Section
-                ShipsSection(
-                  ships: state.recentShips,
+                // Trains Section
+                TrainsSection(
+                  trains: state.trains,
                   onViewAllPressed: () {
                     Navigator.push(
                       context,
-                      FadePageRoute(page: SearchScreen()),
+                      FadePageRoute(page: TrainScreen()),
                     );
                   },
                 ),
 
                 SizedBox(height: 24),
 
-                // Promotions Section
-                PromotionsSection(
-                  promotions: state.promotions,
+                // Schedules Section
+                SchedulesSection(
+                  schedules: state.schedules,
+                  onViewAllPressed: () {
+                    Navigator.push(
+                      context,
+                      FadePageRoute(page: ScheduleScreen()),
+                    );
+                  },
                 ),
 
-                // Add some padding at the bottom for scrolling comfort
+                SizedBox(height: 24),
+
+                // Stations Section (thay thế phần Promotions)
+                StationsSection(
+                  stations: state.stations,
+                  onViewAllPressed: () {
+                    Navigator.push(
+                      context,
+                      FadePageRoute(page: StationScreen()),
+                    );
+                  },
+                ),
+
+                // Thêm padding ở dưới cùng cho thoải mái khi cuộn
                 SizedBox(height: 40),
               ],
             ),

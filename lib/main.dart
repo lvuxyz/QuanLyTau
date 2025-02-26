@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'blocs/welcome/welcome_bloc.dart';
 import 'blocs/home/home_bloc.dart';
-import 'blocs/home/home_event.dart';
+import 'package:shipmanagerapp/blocs/home/home_event.dart';
 import 'blocs/search/search_bloc.dart';
 import 'blocs/ticket/ticket_bloc.dart';
 import 'blocs/ticket/ticket_event.dart';

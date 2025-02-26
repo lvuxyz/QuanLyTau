@@ -1,3 +1,4 @@
+// lib/blocs/home/home_state.dart
 import 'package:equatable/equatable.dart';
 
 abstract class HomeState extends Equatable {
@@ -10,22 +11,26 @@ class HomeInitial extends HomeState {}
 class HomeLoading extends HomeState {}
 
 class HomeLoaded extends HomeState {
-  final List<Map<String, dynamic>> recentShips;
-  final List<Map<String, dynamic>> promotions;
+  final List<Map<String, dynamic>> trains;
+  final List<Map<String, dynamic>> schedules;
+  final List<Map<String, dynamic>> stations;
 
   HomeLoaded({
-    required this.recentShips,
-    required this.promotions,
+    required this.trains,
+    required this.schedules,
+    required this.stations,
   });
 
-  // Computed properties for efficiency
-  int get shipCount => recentShips.length;
-  int get promotionCount => promotions.length;
-  bool get hasShips => recentShips.isNotEmpty;
-  bool get hasPromotions => promotions.isNotEmpty;
+  // Computed properties
+  int get trainCount => trains.length;
+  int get scheduleCount => schedules.length;
+  int get stationCount => stations.length;
+  bool get hasTrains => trains.isNotEmpty;
+  bool get hasSchedules => schedules.isNotEmpty;
+  bool get hasStations => stations.isNotEmpty;
 
   @override
-  List<Object> get props => [recentShips, promotions];
+  List<Object> get props => [trains, schedules, stations];
 }
 
 class HomeError extends HomeState {

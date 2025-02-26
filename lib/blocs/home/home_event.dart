@@ -5,7 +5,14 @@ class LoadHomeData extends HomeEvent {}
 
 class RefreshHomeData extends HomeEvent {}
 
-class SearchShips extends HomeEvent {
-  final String query;
-  SearchShips(this.query);
+class SearchSchedulesEvent extends HomeEvent {
+  final String? departureStation;
+  final String? arrivalStation;
+  final String? departureDate;
+
+  SearchSchedulesEvent({
+    this.departureStation,
+    this.arrivalStation,
+    this.departureDate,
+  });
 }

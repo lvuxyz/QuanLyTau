@@ -11,26 +11,26 @@ class HomeInitial extends HomeState {}
 class HomeLoading extends HomeState {}
 
 class HomeLoaded extends HomeState {
-  final List<Map<String, dynamic>> trains;
+  final List<Map<String, dynamic>> ships;
   final List<Map<String, dynamic>> schedules;
-  final List<Map<String, dynamic>> stations;
+  final List<Map<String, dynamic>> ports;
 
   HomeLoaded({
-    required this.trains,
+    required this.ships,
     required this.schedules,
-    required this.stations,
+    required this.ports,
   });
 
   // Computed properties
-  int get trainCount => trains.length;
+  int get shipCount => ships.length;
   int get scheduleCount => schedules.length;
-  int get stationCount => stations.length;
-  bool get hasTrains => trains.isNotEmpty;
+  int get portCount => ports.length;
+  bool get hasShips => ships.isNotEmpty;
   bool get hasSchedules => schedules.isNotEmpty;
-  bool get hasStations => stations.isNotEmpty;
+  bool get hasPorts => ports.isNotEmpty;
 
   @override
-  List<Object> get props => [trains, schedules, stations];
+  List<Object> get props => [ships, schedules, ports];
 }
 
 class HomeError extends HomeState {

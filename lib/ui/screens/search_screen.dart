@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../blocs/search/search_bloc.dart';
-import '../blocs/search/search_event.dart';
-import '../blocs/search/search_state.dart';
-import '../widgets/home/custom_bottom_nav_bar.dart';
-import '../widgets/search/search_header.dart';
-import '../widgets/search/custom_search_bar.dart';
-import '../widgets/search/search_results.dart';
-import '../widgets/search/search_status_widgets.dart';
+import 'package:shipmanagerapp/blocs/search/search_bloc.dart';
+import 'package:shipmanagerapp/blocs/search/search_event.dart';
+import 'package:shipmanagerapp/blocs/search/search_state.dart';
+import 'package:shipmanagerapp/ui/widgets/home/custom_bottom_nav_bar.dart';
+import 'package:shipmanagerapp/ui/widgets/search/search_widgets.dart';
 
 class SearchScreen extends StatefulWidget {
   @override

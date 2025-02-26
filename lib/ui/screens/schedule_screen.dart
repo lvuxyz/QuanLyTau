@@ -1,9 +1,6 @@
-// lib/screens/schedule_screen.dart
+// lib/ui/screens/schedule_screen.dart
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../services/train_service.dart';
-import '../models/schedule.dart';
-import '../models/station.dart';
 
 class ScheduleScreen extends StatefulWidget {
   const ScheduleScreen({Key? key}) : super(key: key);
@@ -13,17 +10,15 @@ class ScheduleScreen extends StatefulWidget {
 }
 
 class _ScheduleScreenState extends State<ScheduleScreen> {
-  final TrainService _trainService = TrainService();
-
-  List<Station> _stations = [];
-  List<Schedule> _schedules = [];
+  List<Map<String, dynamic>> _ports = [];
+  List<Map<String, dynamic>> _schedules = [];
   bool _isLoading = true;
   bool _isSearching = false;
   String? _error;
 
-  // Bộ lọc tìm kiếm
-  Station? _selectedDepartureStation;
-  Station? _selectedArrivalStation;
+  // Search filters
+  String? _selectedDeparturePort;
+  String? _selectedArrivalPort;
   DateTime _selectedDate = DateTime.now();
 
   @override
@@ -39,39 +34,71 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
         _error = null;
       });
 
-      // Tải danh sách ga
-      final stations = await _trainService.getStations();
+      // Load port list (simulated)
+      await Future.delayed(const Duration(milliseconds: 500));
+      final ports = [
+        {'id': '1', 'name': 'Singapore Port'},
+        {'id': '2', 'name': 'Hong Kong Port'},
+        {'id': '3', 'name': 'Shanghai Port'},
+        {'id': '4', 'name': 'Busan Port'},
+        {'id': '5', 'name': 'Tokyo Port'},
+      ];
 
-      // Tải lịch trình mặc định (7 ngày tới)
-      final now = DateTime.now();
-      final fromDate = '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
-
-      final nextWeek = now.add(Duration(days: 7));
-      final toDate = '${nextWeek.year}-${nextWeek.month.toString().padLeft(2, '0')}-${nextWeek.day.toString().padLeft(2, '0')}';
-
-      final schedules = await _trainService.getSchedules(
-          fromDate: fromDate,
-          toDate: toDate,
-          status: 'ACTIVE'
-      );
+      // Load default schedules (next 7 days)
+      await Future.delayed(const Duration(milliseconds: 300));
+      final schedules = [
+        {
+          'id': '101',
+          'shipId': '1',
+          'shipType': 'Cargo Ship Alpha',
+          'departureDate': '2023-11-10',
+          'departureTime': '09:30',
+          'arrivalTime': '18:45',
+          'departurePort': 'Singapore Port',
+          'arrivalPort': 'Hong Kong Port',
+          'status': 'ACTIVE',
+        },
+        {
+          'id': '102',
+          'shipId': '3',
+          'shipType': 'Container Ship Gamma',
+          'departureDate': '2023-11-12',
+          'departureTime': '07:15',
+          'arrivalTime': '16:30',
+          'departurePort': 'Busan Port',
+          'arrivalPort': 'Tokyo Port',
+          'status': 'PENDING',
+        },
+        {
+          'id': '103',
+          'shipId': '1',
+          'shipType': 'Cargo Ship Alpha',
+          'departureDate': '2023-11-15',
+          'departureTime': '14:00',
+          'arrivalTime': '08:30',
+          'departurePort': 'Hong Kong Port',
+          'arrivalPort': 'Shanghai Port',
+          'status': 'ACTIVE',
+        },
+      ];
 
       setState(() {
-        _stations = stations;
+        _ports = ports;
         _schedules = schedules;
         _isLoading = false;
       });
     } catch (e) {
       setState(() {
-        _error = 'Không thể tải dữ liệu. Vui lòng thử lại sau.';
+        _error = 'Failed to load data. Please try again later.';
         _isLoading = false;
       });
     }
   }
 
   Future<void> _searchSchedules() async {
-    if (_selectedDepartureStation == null && _selectedArrivalStation == null) {
+    if (_selectedDeparturePort == null && _selectedArrivalPort == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Vui lòng chọn ít nhất một ga đi hoặc ga đến'))
+          const SnackBar(content: Text('Please select at least a departure or arrival port'))
       );
       return;
     }
@@ -85,26 +112,47 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
       final dateFormat = DateFormat('yyyy-MM-dd');
       final fromDate = dateFormat.format(_selectedDate);
 
-      // Tính toán ngày kết thúc (7 ngày sau ngày đã chọn)
+      // Calculate end date (7 days after selected date)
       final toDate = dateFormat.format(
-          _selectedDate.add(Duration(days: 7))
+          _selectedDate.add(const Duration(days: 7))
       );
 
-      final schedules = await _trainService.getSchedules(
-          departureStation: _selectedDepartureStation?.stationName,
-          arrivalStation: _selectedArrivalStation?.stationName,
-          fromDate: fromDate,
-          toDate: toDate,
-          status: 'ACTIVE'
-      );
+      // Simulate API call with search parameters
+      await Future.delayed(const Duration(milliseconds: 800));
+
+      // Mock filtered schedules
+      final filteredSchedules = [
+        {
+          'id': '101',
+          'shipId': '1',
+          'shipType': 'Cargo Ship Alpha',
+          'departureDate': '2023-11-10',
+          'departureTime': '09:30',
+          'arrivalTime': '18:45',
+          'departurePort': 'Singapore Port',
+          'arrivalPort': 'Hong Kong Port',
+          'status': 'ACTIVE',
+        },
+        {
+          'id': '104',
+          'shipId': '2',
+          'shipType': 'Tanker Beta',
+          'departureDate': '2023-11-11',
+          'departureTime': '11:00',
+          'arrivalTime': '20:15',
+          'departurePort': 'Singapore Port',
+          'arrivalPort': 'Busan Port',
+          'status': 'ACTIVE',
+        },
+      ];
 
       setState(() {
-        _schedules = schedules;
+        _schedules = filteredSchedules;
         _isSearching = false;
       });
     } catch (e) {
       setState(() {
-        _error = 'Không thể tìm kiếm lịch trình. Vui lòng thử lại sau.';
+        _error = 'Failed to search schedules. Please try again later.';
         _isSearching = false;
       });
     }
@@ -116,7 +164,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
       backgroundColor: const Color(0xFF1A1A1A),
       appBar: AppBar(
         backgroundColor: const Color(0xFF1A1A1A),
-        title: Text('Tìm Kiếm Lịch Trình'),
+        title: const Text('Schedule Search'),
         elevation: 0,
       ),
       body: Column(
@@ -124,86 +172,93 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
           _buildSearchForm(),
           Expanded(
             child: _isLoading
-                ? Center(child: CircularProgressIndicator(color: Color(0xFF13B8A8)))
+                ? Center(child: CircularProgressIndicator(color: const Color(0xFF13B8A8)))
                 : _error != null
-                ? Center(child: Text(_error!, style: TextStyle(color: Colors.white70)))
+                ? Center(child: Text(_error!, style: const TextStyle(color: Colors.white70)))
                 : _buildScheduleList(),
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: const Color(0xFF13B8A8),
+        child: const Icon(Icons.add),
+        onPressed: () {
+          // Navigate to create schedule screen
+        },
       ),
     );
   }
 
   Widget _buildSearchForm() {
     return Container(
-      padding: EdgeInsets.all(16),
-      color: Color(0xFF2A2A2A),
+      padding: const EdgeInsets.all(16),
+      color: const Color(0xFF2A2A2A),
       child: Column(
         children: [
-          // Ga đi
-          _buildStationDropdown(
-            label: 'Ga đi',
-            value: _selectedDepartureStation,
-            onChanged: (Station? station) {
+          // Departure port
+          _buildPortDropdown(
+            label: 'Departure Port',
+            value: _selectedDeparturePort,
+            onChanged: (String? portName) {
               setState(() {
-                _selectedDepartureStation = station;
+                _selectedDeparturePort = portName;
               });
             },
           ),
 
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
 
-          // Ga đến
-          _buildStationDropdown(
-            label: 'Ga đến',
-            value: _selectedArrivalStation,
-            onChanged: (Station? station) {
+          // Arrival port
+          _buildPortDropdown(
+            label: 'Arrival Port',
+            value: _selectedArrivalPort,
+            onChanged: (String? portName) {
               setState(() {
-                _selectedArrivalStation = station;
+                _selectedArrivalPort = portName;
               });
             },
           ),
 
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
 
-          // Chọn ngày
+          // Date picker
           InkWell(
             onTap: () => _selectDate(context),
             child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
               decoration: BoxDecoration(
-                color: Color(0xFF333333),
+                color: const Color(0xFF333333),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.calendar_today, color: Colors.white70, size: 18),
-                  SizedBox(width: 8),
+                  const Icon(Icons.calendar_today, color: Colors.white70, size: 18),
+                  const SizedBox(width: 8),
                   Text(
-                    'Ngày khởi hành: ${DateFormat('dd/MM/yyyy').format(_selectedDate)}',
-                    style: TextStyle(color: Colors.white),
+                    'Departure Date: ${DateFormat('dd/MM/yyyy').format(_selectedDate)}',
+                    style: const TextStyle(color: Colors.white),
                   ),
-                  Spacer(),
-                  Icon(Icons.arrow_drop_down, color: Colors.white70),
+                  const Spacer(),
+                  const Icon(Icons.arrow_drop_down, color: Colors.white70),
                 ],
               ),
             ),
           ),
 
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
 
-          // Nút tìm kiếm
+          // Search button
           ElevatedButton(
             onPressed: _isSearching ? null : _searchSchedules,
             style: ElevatedButton.styleFrom(
-              backgroundColor: Color(0xFF13B8A8),
-              minimumSize: Size(double.infinity, 48),
+              backgroundColor: const Color(0xFF13B8A8),
+              minimumSize: const Size(double.infinity, 48),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
             child: _isSearching
-                ? SizedBox(
+                ? const SizedBox(
               width: 20,
               height: 20,
               child: CircularProgressIndicator(
@@ -211,41 +266,41 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                 strokeWidth: 2,
               ),
             )
-                : Text('Tìm Kiếm'),
+                : const Text('Search'),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildStationDropdown({
+  Widget _buildPortDropdown({
     required String label,
-    required Station? value,
-    required ValueChanged<Station?> onChanged,
+    required String? value,
+    required ValueChanged<String?> onChanged,
   }) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
-        color: Color(0xFF333333),
+        color: const Color(0xFF333333),
         borderRadius: BorderRadius.circular(8),
       ),
       child: DropdownButtonHideUnderline(
-        child: DropdownButton<Station>(
+        child: DropdownButton<String>(
           isExpanded: true,
-          dropdownColor: Color(0xFF333333),
-          hint: Text(label, style: TextStyle(color: Colors.white70)),
+          dropdownColor: const Color(0xFF333333),
+          hint: Text(label, style: const TextStyle(color: Colors.white70)),
           value: value,
-          items: _stations.map((station) {
-            return DropdownMenuItem<Station>(
-              value: station,
+          items: _ports.map((port) {
+            return DropdownMenuItem<String>(
+              value: port['name'],
               child: Text(
-                station.stationName,
-                style: TextStyle(color: Colors.white),
+                port['name'],
+                style: const TextStyle(color: Colors.white),
               ),
             );
           }).toList(),
           onChanged: onChanged,
-          icon: Icon(Icons.arrow_drop_down, color: Colors.white70),
+          icon: const Icon(Icons.arrow_drop_down, color: Colors.white70),
         ),
       ),
     );
@@ -256,11 +311,11 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
       context: context,
       initialDate: _selectedDate,
       firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(Duration(days: 90)),
+      lastDate: DateTime.now().add(const Duration(days: 90)),
       builder: (context, child) {
         return Theme(
           data: ThemeData.dark().copyWith(
-            colorScheme: ColorScheme.dark(
+            colorScheme: const ColorScheme.dark(
               primary: Color(0xFF13B8A8),
               onPrimary: Colors.white,
               surface: Color(0xFF333333),
@@ -281,16 +336,16 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
 
   Widget _buildScheduleList() {
     if (_schedules.isEmpty) {
-      return Center(
+      return const Center(
         child: Text(
-          'Không tìm thấy lịch trình nào',
+          'No schedules found',
           style: TextStyle(color: Colors.white70, fontSize: 16),
         ),
       );
     }
 
     return ListView.builder(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       itemCount: _schedules.length,
       itemBuilder: (context, index) {
         final schedule = _schedules[index];
@@ -299,27 +354,27 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     );
   }
 
-  Widget _buildScheduleCard(Schedule schedule) {
-    // Format hiển thị ngày tháng
+  Widget _buildScheduleCard(Map<String, dynamic> schedule) {
+    // Format date display
     final dateFormat = DateFormat('dd/MM/yyyy');
     DateTime departureDate;
     try {
-      departureDate = DateTime.parse(schedule.departureDate);
+      departureDate = DateTime.parse(schedule['departureDate']);
     } catch (e) {
       departureDate = DateTime.now();
     }
 
     return Container(
-      margin: EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: Color(0xFF2A2A2A),
+        color: const Color(0xFF2A2A2A),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
-            // Xử lý sự kiện khi nhấp vào thẻ lịch trình
+            // Navigate to schedule details
           },
           borderRadius: BorderRadius.circular(12),
           child: Padding(
@@ -330,22 +385,22 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      schedule.train?.trainType ?? 'Tàu ${schedule.trainId}',
-                      style: TextStyle(
+                      schedule['shipType'] ?? 'Unknown',
+                      style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
                       ),
                     ),
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: _getStatusColor(schedule.status),
+                        color: _getStatusColor(schedule['status']),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
-                        _formatStatus(schedule.status),
-                        style: TextStyle(
+                        _formatStatus(schedule['status']),
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
@@ -354,24 +409,24 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                     ),
                   ],
                 ),
-                SizedBox(height: 12),
+                const SizedBox(height: 12),
                 Row(
                   children: [
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'Ga đi',
+                          const Text(
+                            'Departure',
                             style: TextStyle(
                               color: Colors.white60,
                               fontSize: 12,
                             ),
                           ),
-                          SizedBox(height: 4),
+                          const SizedBox(height: 4),
                           Text(
-                            schedule.departureStation,
-                            style: TextStyle(
+                            schedule['departurePort'] ?? '',
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
@@ -379,10 +434,10 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
-                          SizedBox(height: 4),
+                          const SizedBox(height: 4),
                           Text(
-                            schedule.departureTime,
-                            style: TextStyle(
+                            schedule['departureTime'] ?? '',
+                            style: const TextStyle(
                               color: Color(0xFF13B8A8),
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
@@ -392,8 +447,8 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                       ),
                     ),
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 12),
-                      child: Icon(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: const Icon(
                         Icons.arrow_forward,
                         color: Colors.white60,
                         size: 20,
@@ -403,17 +458,17 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'Ga đến',
+                          const Text(
+                            'Arrival',
                             style: TextStyle(
                               color: Colors.white60,
                               fontSize: 12,
                             ),
                           ),
-                          SizedBox(height: 4),
+                          const SizedBox(height: 4),
                           Text(
-                            schedule.arrivalStation,
-                            style: TextStyle(
+                            schedule['arrivalPort'] ?? '',
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
@@ -421,10 +476,10 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
-                          SizedBox(height: 4),
+                          const SizedBox(height: 4),
                           Text(
-                            schedule.arrivalTime,
-                            style: TextStyle(
+                            schedule['arrivalTime'] ?? '',
+                            style: const TextStyle(
                               color: Color(0xFF13B8A8),
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
@@ -435,42 +490,49 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                     ),
                   ],
                 ),
-                SizedBox(height: 12),
-                Divider(height: 1, color: Colors.white24),
-                SizedBox(height: 12),
+                const SizedBox(height: 12),
+                const Divider(height: 1, color: Colors.white24),
+                const SizedBox(height: 12),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Row(
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.calendar_today,
                           size: 16,
                           color: Colors.white70,
                         ),
-                        SizedBox(width: 4),
+                        const SizedBox(width: 4),
                         Text(
                           dateFormat.format(departureDate),
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 14,
                           ),
                         ),
                       ],
                     ),
-                    ElevatedButton(
-                      onPressed: () {
-                        // Xử lý sự kiện đặt vé
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFF13B8A8),
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                    Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.edit, color: Colors.white70, size: 20),
+                          onPressed: () {
+                            // Edit schedule
+                          },
+                          constraints: const BoxConstraints(),
+                          padding: const EdgeInsets.all(8),
                         ),
-                        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      ),
-                      child: Text('Đặt vé'),
+                        const SizedBox(width: 8),
+                        IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.red, size: 20),
+                          onPressed: () {
+                            // Delete schedule
+                          },
+                          constraints: const BoxConstraints(),
+                          padding: const EdgeInsets.all(8),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -482,34 +544,36 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     );
   }
 
-  Color _getStatusColor(String status) {
-    switch (status.toUpperCase()) {
+  Color _getStatusColor(String? status) {
+    switch (status?.toUpperCase()) {
       case 'ACTIVE':
       case 'RUNNING':
-        return Color(0xFF00C853); // Xanh lá
+        return const Color(0xFF00C853);
       case 'PENDING':
-        return Color(0xFFFFB300); // Vàng cam
+        return const Color(0xFFFFB300);
       case 'CANCELLED':
-        return Color(0xFFFF3D00); // Đỏ
+        return const Color(0xFFFF3D00);
       case 'DELAYED':
-        return Color(0xFFFF9800); // Cam
+        return const Color(0xFFFF9800);
       default:
-        return Color(0xFF757575); // Xám
+        return const Color(0xFF757575);
     }
   }
 
-  String _formatStatus(String status) {
+  String _formatStatus(String? status) {
+    if (status == null) return 'N/A';
+
     switch (status.toUpperCase()) {
       case 'ACTIVE':
-        return 'Hoạt động';
+        return 'Active';
       case 'RUNNING':
-        return 'Đang chạy';
+        return 'Running';
       case 'PENDING':
-        return 'Chờ khởi hành';
+        return 'Pending';
       case 'CANCELLED':
-        return 'Đã hủy';
+        return 'Cancelled';
       case 'DELAYED':
-        return 'Trễ chuyến';
+        return 'Delayed';
       default:
         return status;
     }

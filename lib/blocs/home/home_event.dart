@@ -6,13 +6,13 @@ class LoadHomeData extends HomeEvent {}
 class RefreshHomeData extends HomeEvent {}
 
 class SearchSchedulesEvent extends HomeEvent {
-  final String? departureStation;
-  final String? arrivalStation;
+  final String? departurePort;
+  final String? arrivalPort;
   final String? departureDate;
 
   SearchSchedulesEvent({
-    this.departureStation,
-    this.arrivalStation,
+    this.departurePort,
+    this.arrivalPort,
     this.departureDate,
   });
 }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:shipmanagerapp/widgets/home/promotion_card.dart';
+import 'package:shipmanagerapp/ui/widgets/home/promotion_card.dart';
 import 'section_header.dart';
 
 class PromotionCardsSection extends StatelessWidget {

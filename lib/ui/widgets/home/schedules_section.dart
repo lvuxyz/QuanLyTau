@@ -1,4 +1,3 @@
-// lib/widgets/home/schedules_section.dart
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -21,7 +20,7 @@ class SchedulesSection extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             const Text(
-              'Lịch Trình Sắp Tới',
+              'Lịch trình sắp tới',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -32,14 +31,14 @@ class SchedulesSection extends StatelessWidget {
               onPressed: onViewAllPressed,
               child: Row(
                 children: [
-                  Text(
-                    'Xem tất cả',
+                  const Text(
+                    'xem tất cả',
                     style: TextStyle(
                       color: Color(0xFF13B8A8),
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-                  Icon(
+                  const Icon(
                     Icons.arrow_forward_ios,
                     size: 14,
                     color: Color(0xFF13B8A8),
@@ -54,8 +53,8 @@ class SchedulesSection extends StatelessWidget {
             ? _buildEmptyState()
             : ListView.builder(
           shrinkWrap: true,
-          physics: NeverScrollableScrollPhysics(),
-          itemCount: schedules.length,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: schedules.length > 3 ? 3 : schedules.length, // Limit to 3 items
           itemBuilder: (context, index) {
             return _buildScheduleCard(context, schedules[index]);
           },
@@ -69,11 +68,11 @@ class SchedulesSection extends StatelessWidget {
       height: 100,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: Color(0xFF2A2A2A),
+        color: const Color(0xFF2A2A2A),
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Text(
-        'Không có lịch trình nào sắp tới',
+      child: const Text(
+        'No upcoming schedules',
         style: TextStyle(
           color: Colors.white70,
           fontSize: 16,
@@ -83,7 +82,7 @@ class SchedulesSection extends StatelessWidget {
   }
 
   Widget _buildScheduleCard(BuildContext context, Map<String, dynamic> schedule) {
-    // Parse các giá trị ngày giờ
+    // Parse date values
     DateTime departureDate;
     try {
       departureDate = DateTime.parse(schedule['departureDate']);
@@ -91,21 +90,20 @@ class SchedulesSection extends StatelessWidget {
       departureDate = DateTime.now();
     }
 
-    // Format hiển thị ngày tháng
+    // Format date display
     final dateFormat = DateFormat('dd/MM/yyyy');
-    // Removed unused variable timeFormat
 
     return Container(
-      margin: EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Color(0xFF2A2A2A),
+        color: const Color(0xFF2A2A2A),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
-            // Xử lý sự kiện khi nhấn vào lịch trình
+            // Handle schedule selection
           },
           borderRadius: BorderRadius.circular(12),
           child: Padding(
@@ -116,22 +114,22 @@ class SchedulesSection extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      schedule['trainType'] ?? 'Không xác định',
-                      style: TextStyle(
+                      schedule['shipType'] ?? 'Unknown',
+                      style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
                       ),
                     ),
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color: _getStatusColor(schedule['status']),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
                         _formatStatus(schedule['status']),
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
@@ -140,24 +138,24 @@ class SchedulesSection extends StatelessWidget {
                     ),
                   ],
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 Row(
                   children: [
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'Ga đi',
+                          const Text(
+                            'Departure',
                             style: TextStyle(
                               color: Colors.white60,
                               fontSize: 12,
                             ),
                           ),
-                          SizedBox(height: 4),
+                          const SizedBox(height: 4),
                           Text(
-                            schedule['departureStation'] ?? '',
-                            style: TextStyle(
+                            schedule['departurePort'] ?? '',
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
@@ -165,10 +163,10 @@ class SchedulesSection extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
-                          SizedBox(height: 4),
+                          const SizedBox(height: 4),
                           Text(
                             '${schedule['departureTime']}',
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: Color(0xFF13B8A8),
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
@@ -178,8 +176,8 @@ class SchedulesSection extends StatelessWidget {
                       ),
                     ),
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 12),
-                      child: Icon(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: const Icon(
                         Icons.arrow_forward,
                         color: Colors.white60,
                         size: 20,
@@ -189,17 +187,17 @@ class SchedulesSection extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'Ga đến',
+                          const Text(
+                            'Arrival',
                             style: TextStyle(
                               color: Colors.white60,
                               fontSize: 12,
                             ),
                           ),
-                          SizedBox(height: 4),
+                          const SizedBox(height: 4),
                           Text(
-                            schedule['arrivalStation'] ?? '',
-                            style: TextStyle(
+                            schedule['arrivalPort'] ?? '',
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
@@ -207,10 +205,10 @@ class SchedulesSection extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
-                          SizedBox(height: 4),
+                          const SizedBox(height: 4),
                           Text(
                             '${schedule['arrivalTime']}',
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: Color(0xFF13B8A8),
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
@@ -221,23 +219,23 @@ class SchedulesSection extends StatelessWidget {
                     ),
                   ],
                 ),
-                SizedBox(height: 12),
-                Divider(height: 1, color: Colors.white24),
-                SizedBox(height: 12),
+                const SizedBox(height: 12),
+                const Divider(height: 1, color: Colors.white24),
+                const SizedBox(height: 12),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Row(
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.calendar_today,
                           size: 16,
                           color: Colors.white70,
                         ),
-                        SizedBox(width: 4),
+                        const SizedBox(width: 4),
                         Text(
                           dateFormat.format(departureDate),
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 14,
                           ),
@@ -246,17 +244,17 @@ class SchedulesSection extends StatelessWidget {
                     ),
                     ElevatedButton(
                       onPressed: () {
-                        // Xử lý sự kiện đặt vé
+                        // Handle booking
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFF13B8A8),
+                        backgroundColor: const Color(0xFF13B8A8),
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       ),
-                      child: Text('Đặt vé'),
+                      child: const Text('Book'),
                     ),
                   ],
                 ),
@@ -272,15 +270,15 @@ class SchedulesSection extends StatelessWidget {
     switch (status?.toUpperCase()) {
       case 'ACTIVE':
       case 'RUNNING':
-        return Color(0xFF00C853); // Xanh lá
+        return const Color(0xFF00C853);
       case 'PENDING':
-        return Color(0xFFFFB300); // Vàng cam
+        return const Color(0xFFFFB300);
       case 'CANCELLED':
-        return Color(0xFFFF3D00); // Đỏ
+        return const Color(0xFFFF3D00);
       case 'DELAYED':
-        return Color(0xFFFF9800); // Cam
+        return const Color(0xFFFF9800);
       default:
-        return Color(0xFF757575); // Xám
+        return const Color(0xFF757575);
     }
   }
 
@@ -289,15 +287,15 @@ class SchedulesSection extends StatelessWidget {
 
     switch (status.toUpperCase()) {
       case 'ACTIVE':
-        return 'Hoạt động';
+        return 'Active';
       case 'RUNNING':
-        return 'Đang chạy';
+        return 'Running';
       case 'PENDING':
-        return 'Chờ khởi hành';
+        return 'Pending';
       case 'CANCELLED':
-        return 'Đã hủy';
+        return 'Cancelled';
       case 'DELAYED':
-        return 'Trễ chuyến';
+        return 'Delayed';
       default:
         return status;
     }

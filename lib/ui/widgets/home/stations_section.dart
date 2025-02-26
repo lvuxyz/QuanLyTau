@@ -1,4 +1,3 @@
-// lib/widgets/home/stations_section.dart
 import 'package:flutter/material.dart';
 
 class StationsSection extends StatelessWidget {
@@ -20,7 +19,7 @@ class StationsSection extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             const Text(
-              'Ga Tàu',
+              'Ports',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -31,14 +30,14 @@ class StationsSection extends StatelessWidget {
               onPressed: onViewAllPressed,
               child: Row(
                 children: [
-                  Text(
-                    'Xem tất cả',
+                  const Text(
+                    'View all',
                     style: TextStyle(
                       color: Color(0xFF13B8A8),
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-                  Icon(
+                  const Icon(
                     Icons.arrow_forward_ios,
                     size: 14,
                     color: Color(0xFF13B8A8),
@@ -53,8 +52,8 @@ class StationsSection extends StatelessWidget {
             ? _buildEmptyState()
             : ListView.builder(
           shrinkWrap: true,
-          physics: NeverScrollableScrollPhysics(),
-          itemCount: stations.length,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: stations.length > 3 ? 3 : stations.length, // Limit to 3 items
           itemBuilder: (context, index) {
             return _buildStationCard(context, stations[index]);
           },
@@ -68,11 +67,11 @@ class StationsSection extends StatelessWidget {
       height: 100,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: Color(0xFF2A2A2A),
+        color: const Color(0xFF2A2A2A),
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Text(
-        'Không tìm thấy thông tin ga',
+      child: const Text(
+        'No ports found',
         style: TextStyle(
           color: Colors.white70,
           fontSize: 16,
@@ -83,16 +82,16 @@ class StationsSection extends StatelessWidget {
 
   Widget _buildStationCard(BuildContext context, Map<String, dynamic> station) {
     return Container(
-      margin: EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Color(0xFF2A2A2A),
+        color: const Color(0xFF2A2A2A),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
-            // Xử lý sự kiện khi nhấn vào ga
+            // Handle port selection
           },
           borderRadius: BorderRadius.circular(12),
           child: Padding(
@@ -103,23 +102,23 @@ class StationsSection extends StatelessWidget {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: Color(0xFF13B8A8).withOpacity(0.2),
+                    color: const Color(0xFF13B8A8).withOpacity(0.2),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(
-                    Icons.train,
+                  child: const Icon(
+                    Icons.anchor,
                     color: Color(0xFF13B8A8),
                     size: 24,
                   ),
                 ),
-                SizedBox(width: 16),
+                const SizedBox(width: 16),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        station['name'] ?? 'Không có tên',
-                        style: TextStyle(
+                        station['name'] ?? 'Unnamed Port',
+                        style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
@@ -127,10 +126,10 @@ class StationsSection extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      SizedBox(height: 4),
+                      const SizedBox(height: 4),
                       Text(
-                        station['location'] ?? 'Không có địa chỉ',
-                        style: TextStyle(
+                        station['location'] ?? 'No location',
+                        style: const TextStyle(
                           color: Colors.white70,
                           fontSize: 14,
                         ),
@@ -141,22 +140,22 @@ class StationsSection extends StatelessWidget {
                   ),
                 ),
                 Container(
-                  padding: EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Color(0xFF333333),
+                    color: const Color(0xFF333333),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
                     children: [
-                      Icon(
-                        Icons.route,
+                      const Icon(
+                        Icons.directions_boat,
                         color: Color(0xFF13B8A8),
                         size: 16,
                       ),
-                      SizedBox(width: 4),
+                      const SizedBox(width: 4),
                       Text(
-                        '${station['numberOfLines'] ?? 0} tuyến',
-                        style: TextStyle(
+                        '${station['shipCount'] ?? 0} ships',
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 12,
                         ),

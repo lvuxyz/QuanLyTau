@@ -1,4 +1,4 @@
-// lib/widgets/home/trains_section.dart
+// lib/ui/widgets/home/trains_section.dart
 import 'package:flutter/material.dart';
 
 class TrainsSection extends StatelessWidget {
@@ -167,16 +167,16 @@ class TrainsSection extends StatelessWidget {
   Color _getStatusColor(String? status) {
     switch (status?.toUpperCase()) {
       case 'ACTIVE':
-        return Color(0xFF00C853); // Xanh lá
+        return Color(0xFF00C853);
       case 'MAINTENANCE':
-        return Color(0xFFFFB300); // Vàng cam
+        return Color(0xFFFFB300);
       case 'OUT OF SERVICE':
       case 'OUT_OF_SERVICE':
-        return Color(0xFFFF3D00); // Đỏ
+        return Color(0xFFFF3D00);
       case 'RESERVED':
-        return Color(0xFF2196F3); // Xanh dương
+        return Color(0xFF2196F3);
       default:
-        return Color(0xFF757575); // Xám
+        return Color(0xFF757575);
     }
   }
 

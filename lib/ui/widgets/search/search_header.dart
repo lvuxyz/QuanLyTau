@@ -1,3 +1,4 @@
+// lib/ui/widgets/search/search_header.dart
 import 'package:flutter/material.dart';
 
 class SearchHeader extends StatelessWidget {

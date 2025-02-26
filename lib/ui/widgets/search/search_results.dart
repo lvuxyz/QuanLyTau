@@ -1,5 +1,5 @@
+// lib/ui/widgets/search/search_results.dart
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 
 class SearchResults extends StatelessWidget {
   final List<Map<String, dynamic>> results;
@@ -8,6 +8,7 @@ class SearchResults extends StatelessWidget {
     Key? key,
     required this.results,
   }) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
@@ -55,29 +56,16 @@ class SearchResultItem extends StatelessWidget {
           padding: EdgeInsets.all(12),
           child: Row(
             children: [
-              // Ship image (cached)
+              // Ship image
               if (imageUrl != null)
                 ClipRRect(
                   borderRadius: BorderRadius.circular(8),
-                  child: CachedNetworkImage(
-                    imageUrl: imageUrl,
+                  child: Image.network(
+                    imageUrl,
                     width: 60,
                     height: 60,
                     fit: BoxFit.cover,
-                    placeholder: (context, url) => Container(
-                      color: Colors.grey[800],
-                      child: Center(
-                        child: SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                    errorWidget: (context, url, error) => Container(
+                    errorBuilder: (context, error, stackTrace) => Container(
                       color: Colors.grey[800],
                       width: 60,
                       height: 60,
@@ -86,8 +74,19 @@ class SearchResultItem extends StatelessWidget {
                         color: Colors.white,
                       ),
                     ),
-                    memCacheHeight: 120,
-                    memCacheWidth: 120,
+                  ),
+                )
+              else
+                Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[800],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    Icons.directions_boat,
+                    color: Colors.white,
                   ),
                 ),
 

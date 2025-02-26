@@ -1,31 +1,27 @@
+// lib/blocs/login/login_bloc.dart
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../services/auth_service.dart';
+import '../../repositories/auth_repository.dart';
 import 'login_event.dart';
 import 'login_state.dart';
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
-  final AuthService authService;
+  final AuthRepository authRepository;
 
-  LoginBloc({required this.authService}) : super(LoginInitial()) {
+  LoginBloc({required this.authRepository}) : super(LoginInitial()) {
     on<LoginButtonPressed>((event, emit) async {
       emit(LoginLoading());
       try {
-        print('🛠 Đang gửi yêu cầu đăng nhập...');
-
-        final result = await authService.login(
+        final result = await authRepository.login(
           event.username,
           event.password,
         );
 
-        if (result['success'] == true) {
-          print('✅ Đăng nhập thành công');
+        if (result['success']) {
           emit(LoginSuccess(userData: result['data']));
         } else {
-          print('❌ Lỗi đăng nhập: ${result['message']}');
           emit(LoginFailure(errorMessage: result['message']));
         }
       } catch (e) {
-        print('⚠️ Lỗi kết nối đến máy chủ: $e');
         emit(NetworkError(
           message: 'Không thể kết nối đến máy chủ. Vui lòng thử lại sau.',
         ));
@@ -34,6 +30,20 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
     on<LoginReset>((event, emit) {
       emit(LoginInitial());
+    });
+
+    on<ForgotPasswordPressed>((event, emit) async {
+      emit(ForgotPasswordLoading());
+      try {
+        // In a real application, implement the forgot password logic here
+        // For now, we'll just simulate a successful response
+        await Future.delayed(Duration(seconds: 1));
+        emit(ForgotPasswordSuccess(message: 'Đã gửi email đặt lại mật khẩu'));
+      } catch (e) {
+        emit(ForgotPasswordFailure(
+            errorMessage: 'Không thể gửi email đặt lại mật khẩu. Vui lòng thử lại sau.'
+        ));
+      }
     });
   }
 }

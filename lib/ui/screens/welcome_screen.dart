@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../blocs/welcome/welcome_bloc.dart';
-import '../blocs/welcome/welcome_event.dart';
-import '../blocs/welcome/welcome_state.dart';
+import 'package:shipmanagerapp/blocs/welcome/welcome_bloc.dart';
+import 'package:shipmanagerapp/blocs/welcome/welcome_state.dart';
+import 'package:shipmanagerapp/blocs/welcome/welcome_event.dart';
 import '../screens/login_screen.dart';
 import 'register_screen.dart'; // Import for the RegisterScreen
 

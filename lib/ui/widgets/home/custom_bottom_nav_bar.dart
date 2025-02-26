@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:shipmanagerapp/screens/home_screen.dart';
-import 'package:shipmanagerapp/screens/search_screen.dart';
-import 'package:shipmanagerapp/screens/ticket_screen.dart';
+import 'package:shipmanagerapp/ui/screens/home_screen.dart';
+import 'package:shipmanagerapp/ui/screens/search_screen.dart';
+import 'package:shipmanagerapp/ui/screens/ticket_screen.dart';
 import 'package:shipmanagerapp/utils/custom_route.dart';
 
 class CustomBottomNavBar extends StatelessWidget {
@@ -28,7 +28,7 @@ class CustomBottomNavBar extends StatelessWidget {
           BoxShadow(
             color: Colors.black.withOpacity(0.2),
             blurRadius: 4,
-            offset: Offset(0, -2),
+            offset: const Offset(0, -2),
           ),
         ],
       ),
@@ -37,50 +37,52 @@ class CustomBottomNavBar extends StatelessWidget {
         children: [
           NavBarItem(
             icon: Icons.home_filled,
-            label: "Trang chủ",
+            label: "Home",
             isActive: currentIndex == 0,
             onTap: () {
               if (currentIndex != 0) {
                 Navigator.pushReplacement(
                   context,
-                  FadePageRoute(page: HomeScreen()),
+                  FadePageRoute(page: const HomeScreen()),
                 );
               }
             },
           ),
           NavBarItem(
             icon: Icons.search,
-            label: "Tìm kiếm",
+            label: "Search",
             isActive: currentIndex == 1,
             onTap: () {
               if (currentIndex != 1) {
-                Navigator.pushReplacement(
-                  context,
-                  SlidePageRoute(
-                    page: SearchScreen(),
-                    direction: currentIndex < 1
-                        ? SlideDirection.fromRight
-                        : SlideDirection.fromLeft,
-                  ),
-                );
+                // You'll need to create a SearchScreen class
+                // Navigator.pushReplacement(
+                //   context,
+                //   SlidePageRoute(
+                //     page: SearchScreen(),
+                //     direction: currentIndex < 1
+                //         ? SlideDirection.fromRight
+                //         : SlideDirection.fromLeft,
+                //   ),
+                // );
               }
             },
           ),
           NavBarItem(
             icon: Icons.directions_boat_outlined,
-            label: "Vé",
+            label: "Ships",
             isActive: currentIndex == 2,
             onTap: () {
               if (currentIndex != 2) {
-                Navigator.pushReplacement(
-                  context,
-                  SlidePageRoute(
-                    page: TicketScreen(),
-                    direction: currentIndex < 2
-                        ? SlideDirection.fromRight
-                        : SlideDirection.fromLeft,
-                  ),
-                );
+                // You'll need to create a TicketScreen class
+                // Navigator.pushReplacement(
+                //   context,
+                //   SlidePageRoute(
+                //     page: TicketScreen(),
+                //     direction: currentIndex < 2
+                //         ? SlideDirection.fromRight
+                //         : SlideDirection.fromLeft,
+                //   ),
+                // );
               }
             },
           ),
@@ -114,13 +116,13 @@ class NavBarItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color color = isActive ? Color(0xFF13B8A8) : Colors.grey;
+    Color color = isActive ? const Color(0xFF13B8A8) : Colors.grey;
 
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        splashColor: Color(0xFF13B8A8).withOpacity(0.1),
+        splashColor: const Color(0xFF13B8A8).withOpacity(0.1),
         highlightColor: Colors.transparent,
         borderRadius: BorderRadius.circular(8),
         child: Padding(
@@ -129,7 +131,7 @@ class NavBarItem extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(icon, color: color, size: 24),
-              SizedBox(height: 4),
+              const SizedBox(height: 4),
               Text(
                 label,
                 style: TextStyle(

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class CustomAppBar extends StatelessWidget {
+  const CustomAppBar({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return SliverAppBar(
@@ -11,25 +13,25 @@ class CustomAppBar extends StatelessWidget {
           // User avatar
           CircleAvatar(
             radius: 16,
-            backgroundColor: Colors.grey[800], // Màu nền dự phòng
+            backgroundColor: Colors.grey[800],
             child: ClipOval(
               child: Image.asset(
-                'assets/images/user_avatar.png',
+                'assets/images/user_avatar.jpg',
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
-                  return Icon(Icons.person, color: Colors.white);
+                  return const Icon(Icons.person, color: Colors.white);
                 },
               ),
             ),
           ),
 
-          SizedBox(width: 8),
+          const SizedBox(width: 8),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                "Chào, Admin",
+              const Text(
+                "Welcome, Captain",
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 14,
@@ -37,7 +39,7 @@ class CustomAppBar extends StatelessWidget {
                 ),
               ),
               Text(
-                "Hôm nay bạn khỏe không?",
+                "How are you today?",
                 style: TextStyle(
                   color: Colors.white.withOpacity(0.7),
                   fontSize: 12,
@@ -49,7 +51,7 @@ class CustomAppBar extends StatelessWidget {
       ),
       actions: [
         IconButton(
-          icon: Icon(Icons.notifications_none, color: Colors.white),
+          icon: const Icon(Icons.notifications_none, color: Colors.white),
           onPressed: () {},
         ),
       ],

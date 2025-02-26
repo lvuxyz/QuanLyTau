@@ -19,11 +19,11 @@ class User {
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       id: json['id'].toString(),
-      username: json['username'],
-      email: json['email'],
+      username: json['username'] ?? '',
+      email: json['email'] ?? '',
       name: json['name'],
       role: json['role'],
-      token: json['token'],
+      token: json['token'] ?? '',
     );
   }
 
@@ -38,6 +38,5 @@ class User {
     };
   }
 
-  // You might add convenience methods here
   bool get isAdmin => role == 'admin';
 }

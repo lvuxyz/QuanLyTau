@@ -1,18 +1,18 @@
-// lib/screens/home_screen.dart
+// lib/ui/screens/home_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../blocs/home/home_bloc.dart';
-import '../blocs/home/home_event.dart';
-import '../blocs/home/home_state.dart';
-import '../widgets/home/custom_app_bar.dart';
-import '../widgets/home/custom_bottom_nav_bar.dart';
-import '../widgets/home/trains_section.dart';
-import '../widgets/home/schedules_section.dart';
-import '../widgets/home/stations_section.dart';
-import '../utils/custom_route.dart';
-import '../screens/schedule_screen.dart';
-import '../screens/station_screen.dart';
-import '../screens/train_screen.dart';
+import '../../blocs/home/home_bloc.dart';
+import '../../blocs/home/home_event.dart';
+import '../../blocs/home/home_state.dart';
+import '../../ui/widgets/home/custom_app_bar.dart';
+import '../../ui/widgets/home/custom_bottom_nav_bar.dart';
+import '../../ui/widgets/home/trains_section.dart';
+import '../../ui/widgets/home/schedules_section.dart';
+import '../../ui/widgets/home/stations_section.dart';
+import '../../utils/custom_route.dart';
+import 'schedule_screen.dart';
+import 'station_screen.dart';
+import 'train_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -37,10 +37,10 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
         child: RefreshIndicator(
           key: _refreshIndicatorKey,
           color: const Color(0xFF13B8A8),
-          backgroundColor: Color(0xFF333333),
+          backgroundColor: const Color(0xFF333333),
           onRefresh: () async {
             context.read<HomeBloc>().add(RefreshHomeData());
-            return await Future.delayed(Duration(milliseconds: 800));
+            return await Future.delayed(const Duration(milliseconds: 800));
           },
           child: BlocBuilder<HomeBloc, HomeState>(
             builder: (context, state) {
@@ -66,9 +66,9 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
 
   Widget _buildLoadingView() {
     return CustomScrollView(
-      physics: AlwaysScrollableScrollPhysics(),
+      physics: const AlwaysScrollableScrollPhysics(),
       slivers: [
-        CustomAppBar(),
+        const CustomAppBar(),
         SliverFillRemaining(
           child: Center(
             child: CircularProgressIndicator(
@@ -82,29 +82,29 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
 
   Widget _buildErrorView(String message) {
     return CustomScrollView(
-      physics: AlwaysScrollableScrollPhysics(),
+      physics: const AlwaysScrollableScrollPhysics(),
       slivers: [
-        CustomAppBar(),
+        const CustomAppBar(),
         SliverFillRemaining(
           child: Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
+                const Icon(
                   Icons.error_outline,
                   color: Colors.red,
                   size: 48,
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 Text(
                   message,
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 16,
                   ),
                   textAlign: TextAlign.center,
                 ),
-                SizedBox(height: 24),
+                const SizedBox(height: 24),
                 ElevatedButton(
                   onPressed: () {
                     context.read<HomeBloc>().add(LoadHomeData());
@@ -115,9 +115,9 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                   ),
-                  child: Text('Thử lại'),
+                  child: const Text('Try Again'),
                 ),
               ],
             ),
@@ -131,25 +131,25 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
     return CustomScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
       slivers: [
-        CustomAppBar(),
+        const CustomAppBar(),
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Trains Section
+                // Ships Section
                 TrainsSection(
-                  trains: state.trains,
+                  trains: state.ships,
                   onViewAllPressed: () {
                     Navigator.push(
                       context,
-                      FadePageRoute(page: TrainScreen()),
+                      FadePageRoute(page: const TrainScreen()),
                     );
                   },
                 ),
 
-                SizedBox(height: 24),
+                const SizedBox(height: 24),
 
                 // Schedules Section
                 SchedulesSection(
@@ -157,26 +157,26 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                   onViewAllPressed: () {
                     Navigator.push(
                       context,
-                      FadePageRoute(page: ScheduleScreen()),
+                      FadePageRoute(page: const ScheduleScreen()),
                     );
                   },
                 ),
 
-                SizedBox(height: 24),
+                const SizedBox(height: 24),
 
-                // Stations Section (thay thế phần Promotions)
+                // Ports Section
                 StationsSection(
-                  stations: state.stations,
+                  stations: state.ports,
                   onViewAllPressed: () {
                     Navigator.push(
                       context,
-                      FadePageRoute(page: StationScreen()),
+                      FadePageRoute(page: const StationScreen()),
                     );
                   },
                 ),
 
-                // Thêm padding ở dưới cùng cho thoải mái khi cuộn
-                SizedBox(height: 40),
+                // Add bottom padding for comfortable scrolling
+                const SizedBox(height: 40),
               ],
             ),
           ),

@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../blocs/ticket/ticket_bloc.dart';
-import '../blocs/ticket/ticket_event.dart';
-import '../blocs/ticket/ticket_state.dart';
-import '../widgets/home/custom_bottom_nav_bar.dart';
-import '../widgets/ticket/ticket_item.dart';
-
+import 'package:shipmanagerapp/blocs/ticket/ticket_bloc.dart';
+import 'package:shipmanagerapp/blocs/ticket/ticket_event.dart';
+import 'package:shipmanagerapp/blocs/ticket/ticket_state.dart';
+import 'package:shipmanagerapp/ui/widgets/home/custom_bottom_nav_bar.dart';
+import 'package:shipmanagerapp/ui/widgets/ticket/ticket_item.dart';
 class TicketScreen extends StatefulWidget {
   @override
   _TicketScreenState createState() => _TicketScreenState();

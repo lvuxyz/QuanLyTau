@@ -1,6 +1,12 @@
+// lib/blocs/home/home_bloc.dart
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import '../../models/train.dart';
+import '../../models/schedule.dart';
+import '../../models/station.dart';
+import '../../services/train_service.dart';
+import '../../services/station_service.dart';
 import 'home_event.dart';
 import 'home_state.dart';
 
@@ -9,6 +15,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   static const Duration _cacheDuration = Duration(minutes: 30);
   static DateTime? _lastCacheTime;
 
+  final TrainService _trainService = TrainService();
+  final StationService _stationService = StationService();
+
   HomeBloc() : super(HomeInitial()) {
     on<LoadHomeData>((event, emit) async {
       if (state is! HomeLoading) {
@@ -16,81 +25,154 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       }
 
       try {
-        // Try to load cached data first for instant UI rendering
+        // Thử tải dữ liệu từ cache trước
         final cachedData = await _getCachedHomeData();
         if (cachedData != null) {
           emit(HomeLoaded(
-            recentShips: cachedData['recentShips'],
-            promotions: cachedData['promotions'],
+            trains: cachedData['trains'] as List<Map<String, dynamic>>,
+            schedules: cachedData['schedules'] as List<Map<String, dynamic>>,
+            stations: cachedData['stations'] as List<Map<String, dynamic>>,
           ));
         }
 
-        // If cache is old or doesn't exist, fetch fresh data
+        // Nếu cache quá cũ hoặc không tồn tại, tải dữ liệu mới
         if (_lastCacheTime == null ||
             DateTime.now().difference(_lastCacheTime!) > _cacheDuration ||
             cachedData == null) {
 
-          // In a real app, this would be an API call
-          await Future.delayed(Duration(milliseconds: 300));
+          // Tải dữ liệu tàu
+          final List<Train> trains = await _trainService.getTrains();
 
-          final recentShips = [
-            {'id': '1', 'name': 'Tàu A', 'status': 'Đang hoạt động', 'imageUrl': 'https://example.com/ship1.jpg'},
-            {'id': '2', 'name': 'Tàu B', 'status': 'Bảo trì', 'imageUrl': 'https://example.com/ship2.jpg'},
-          ];
+          // Lấy ngày hiện tại cho lịch trình
+          final now = DateTime.now();
+          final fromDate = '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
 
-          final promotions = [
-            {'id': '1', 'title': 'Khuyến mãi tháng 6', 'discount': '20%', 'imageUrl': 'https://example.com/promo1.jpg'},
-            {'id': '2', 'title': 'Ưu đãi đặc biệt', 'discount': '15%', 'imageUrl': 'https://example.com/promo2.jpg'},
-          ];
+          // Tính ngày sau 7 ngày
+          final nextWeek = now.add(Duration(days: 7));
+          final toDate = '${nextWeek.year}-${nextWeek.month.toString().padLeft(2, '0')}-${nextWeek.day.toString().padLeft(2, '0')}';
 
-          // Cache the new data
-          _cacheHomeData(recentShips, promotions);
+          // Lấy lịch trình sắp tới
+          final List<Schedule> schedules = await _trainService.getSchedules(
+              fromDate: fromDate,
+              toDate: toDate,
+              status: 'ACTIVE'
+          );
+
+          // Lấy danh sách ga
+          final List<Station> stations = await _stationService.getStations();
+
+          // Mã hóa dữ liệu train để lưu cache
+          final List<Map<String, dynamic>> trainsJson = trains.take(5).map((train) => {
+            'id': train.id,
+            'name': train.trainType,
+            'status': train.status,
+            'operator': train.trainOperator,
+          }).toList();
+
+          // Mã hóa dữ liệu schedule để lưu cache
+          final List<Map<String, dynamic>> schedulesJson = schedules.take(10).map((schedule) => {
+            'id': schedule.id,
+            'trainId': schedule.trainId,
+            'trainType': schedule.train?.trainType ?? 'Tàu chưa xác định',
+            'departureDate': schedule.departureDate,
+            'departureTime': schedule.departureTime,
+            'arrivalTime': schedule.arrivalTime,
+            'departureStation': schedule.departureStation,
+            'arrivalStation': schedule.arrivalStation,
+            'status': schedule.status,
+          }).toList();
+
+          // Mã hóa dữ liệu station để lưu cache
+          final List<Map<String, dynamic>> stationsJson = stations.take(5).map((station) => {
+            'id': station.id,
+            'name': station.stationName,
+            'location': station.location,
+            'numberOfLines': station.numberOfLines,
+          }).toList();
+
+          // Lưu cache dữ liệu mới
+          _cacheHomeData(trainsJson, schedulesJson, stationsJson);
 
           emit(HomeLoaded(
-            recentShips: recentShips,
-            promotions: promotions,
+            trains: trainsJson,
+            schedules: schedulesJson,
+            stations: stationsJson,
           ));
         }
       } catch (e) {
+        print('Lỗi tải dữ liệu trang chủ: $e');
         emit(HomeError('Không thể tải dữ liệu. Vui lòng thử lại sau.'));
       }
     });
 
     on<RefreshHomeData>((event, emit) async {
-      final currentState = state;
-      if (currentState is HomeLoaded) {
-        // Keep current data visible while refreshing
-        try {
-          // In a real app, this would be an API call
-          await Future.delayed(Duration(milliseconds: 800));
+      try {
+        // Tải dữ liệu từ API
+        final List<Train> trains = await _trainService.getTrains();
 
-          final recentShips = [
-            {'id': '1', 'name': 'Tàu A', 'status': 'Đang hoạt động', 'imageUrl': 'https://example.com/ship1.jpg'},
-            {'id': '2', 'name': 'Tàu B', 'status': 'Bảo trì', 'imageUrl': 'https://example.com/ship2.jpg'},
-            {'id': '3', 'name': 'Tàu C', 'status': 'Đang hoạt động', 'imageUrl': 'https://example.com/ship3.jpg'},
-          ];
+        // Lấy ngày hiện tại cho lịch trình
+        final now = DateTime.now();
+        final fromDate = '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
 
-          final promotions = [
-            {'id': '1', 'title': 'Khuyến mãi tháng 6', 'discount': '20%', 'imageUrl': 'https://example.com/promo1.jpg'},
-            {'id': '2', 'title': 'Ưu đãi đặc biệt', 'discount': '15%', 'imageUrl': 'https://example.com/promo2.jpg'},
-          ];
+        // Tính ngày sau 7 ngày
+        final nextWeek = now.add(Duration(days: 7));
+        final toDate = '${nextWeek.year}-${nextWeek.month.toString().padLeft(2, '0')}-${nextWeek.day.toString().padLeft(2, '0')}';
 
-          // Cache the new data
-          _cacheHomeData(recentShips, promotions);
+        // Lấy lịch trình sắp tới
+        final List<Schedule> schedules = await _trainService.getSchedules(
+            fromDate: fromDate,
+            toDate: toDate,
+            status: 'ACTIVE'
+        );
 
-          emit(HomeLoaded(
-            recentShips: recentShips,
-            promotions: promotions,
-          ));
-        } catch (e) {
-          // If refresh fails, keep showing existing data
-          emit(currentState);
+        // Lấy danh sách ga
+        final List<Station> stations = await _stationService.getStations();
+
+        // Mã hóa dữ liệu train để lưu cache
+        final List<Map<String, dynamic>> trainsJson = trains.take(5).map((train) => {
+          'id': train.id,
+          'name': train.trainType,
+          'status': train.status,
+          'operator': train.trainOperator,
+        }).toList();
+
+        // Mã hóa dữ liệu schedule để lưu cache
+        final List<Map<String, dynamic>> schedulesJson = schedules.take(10).map((schedule) => {
+          'id': schedule.id,
+          'trainId': schedule.trainId,
+          'trainType': schedule.train?.trainType ?? 'Tàu chưa xác định',
+          'departureDate': schedule.departureDate,
+          'departureTime': schedule.departureTime,
+          'arrivalTime': schedule.arrivalTime,
+          'departureStation': schedule.departureStation,
+          'arrivalStation': schedule.arrivalStation,
+          'status': schedule.status,
+        }).toList();
+
+        // Mã hóa dữ liệu station để lưu cache
+        final List<Map<String, dynamic>> stationsJson = stations.take(5).map((station) => {
+          'id': station.id,
+          'name': station.stationName,
+          'location': station.location,
+          'numberOfLines': station.numberOfLines,
+        }).toList();
+
+        // Lưu cache dữ liệu mới
+        _cacheHomeData(trainsJson, schedulesJson, stationsJson);
+
+        emit(HomeLoaded(
+          trains: trainsJson,
+          schedules: schedulesJson,
+          stations: stationsJson,
+        ));
+      } catch (e) {
+        // Nếu refresh thất bại, giữ lại trạng thái hiện tại
+        if (state is HomeLoaded) {
+          emit(state);
+        } else {
+          emit(HomeError('Không thể làm mới dữ liệu. Vui lòng thử lại sau.'));
         }
       }
-    });
-
-    on<SearchShips>((event, emit) async {
-      // Keep this implementation as is or enhance as needed
     });
   }
 
@@ -104,22 +186,27 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         final cacheTime = DateTime.fromMillisecondsSinceEpoch(cachedData['timestamp']);
         _lastCacheTime = cacheTime;
 
-        // Check if cache is still valid
+        // Kiểm tra xem cache còn hợp lệ không
         if (DateTime.now().difference(cacheTime) <= _cacheDuration) {
           return {
-            'recentShips': List<Map<String, dynamic>>.from(cachedData['recentShips']),
-            'promotions': List<Map<String, dynamic>>.from(cachedData['promotions']),
+            'trains': List<Map<String, dynamic>>.from(cachedData['trains']),
+            'schedules': List<Map<String, dynamic>>.from(cachedData['schedules']),
+            'stations': List<Map<String, dynamic>>.from(cachedData['stations']),
           };
         }
       }
       return null;
     } catch (e) {
-      // If there's any error reading cache, return null and fetch fresh data
+      // Nếu có lỗi khi đọc cache, trả về null và tải dữ liệu mới
       return null;
     }
   }
 
-  Future<void> _cacheHomeData(List<Map<String, dynamic>> ships, List<Map<String, dynamic>> promotions) async {
+  Future<void> _cacheHomeData(
+      List<Map<String, dynamic>> trains,
+      List<Map<String, dynamic>> schedules,
+      List<Map<String, dynamic>> stations
+      ) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final now = DateTime.now();
@@ -127,13 +214,14 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
       final cacheData = {
         'timestamp': now.millisecondsSinceEpoch,
-        'recentShips': ships,
-        'promotions': promotions,
+        'trains': trains,
+        'schedules': schedules,
+        'stations': stations,
       };
 
       await prefs.setString(_cacheKey, json.encode(cacheData));
     } catch (e) {
-      // Silent failure if caching doesn't work
+      print('Lỗi khi lưu cache: $e');
     }
   }
 }

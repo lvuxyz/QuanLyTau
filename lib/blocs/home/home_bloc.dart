@@ -1,15 +1,14 @@
 // lib/blocs/home/home_bloc.dart
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shipmanagerapp/blocs/home/home_event.dart';
+import 'package:shipmanagerapp/blocs/home/home_state.dart';
 import 'dart:convert';
 import '../../models/train.dart';
 import '../../models/schedule.dart';
 import '../../models/station.dart';
 import '../../services/train_service.dart';
 import '../../services/station_service.dart';
-import 'home_event.dart';
-import 'home_state.dart';
-
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
   static const String _cacheKey = 'home_data_cache';
   static const Duration _cacheDuration = Duration(minutes: 30);

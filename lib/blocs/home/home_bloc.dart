@@ -1,14 +1,15 @@
 // lib/blocs/home/home_bloc.dart
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:shipmanagerapp/blocs/home/home_event.dart';
-import 'package:shipmanagerapp/blocs/home/home_state.dart';
 import 'dart:convert';
 import '../../models/train.dart';
 import '../../models/schedule.dart';
 import '../../models/station.dart';
 import '../../services/train_service.dart';
 import '../../services/station_service.dart';
+import 'home_event.dart';
+import 'home_state.dart';
+
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
   static const String _cacheKey = 'home_data_cache';
   static const Duration _cacheDuration = Duration(minutes: 30);
@@ -24,7 +25,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       }
 
       try {
-        // Thử tải dữ liệu từ cache trước
+        // Try to load data from cache first
         final cachedData = await _getCachedHomeData();
         if (cachedData != null) {
           emit(HomeLoaded(
@@ -34,33 +35,33 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           ));
         }
 
-        // Nếu cache quá cũ hoặc không tồn tại, tải dữ liệu mới
+        // If cache is too old or doesn't exist, load new data
         if (_lastCacheTime == null ||
             DateTime.now().difference(_lastCacheTime!) > _cacheDuration ||
             cachedData == null) {
 
-          // Tải dữ liệu tàu
+          // Load trains
           final List<Train> trains = await _trainService.getTrains();
 
-          // Lấy ngày hiện tại cho lịch trình
+          // Get current date for schedules
           final now = DateTime.now();
           final fromDate = '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
 
-          // Tính ngày sau 7 ngày
+          // Calculate date 7 days ahead
           final nextWeek = now.add(Duration(days: 7));
           final toDate = '${nextWeek.year}-${nextWeek.month.toString().padLeft(2, '0')}-${nextWeek.day.toString().padLeft(2, '0')}';
 
-          // Lấy lịch trình sắp tới
+          // Load upcoming schedules
           final List<Schedule> schedules = await _trainService.getSchedules(
               fromDate: fromDate,
               toDate: toDate,
               status: 'ACTIVE'
           );
 
-          // Lấy danh sách ga
+          // Load stations
           final List<Station> stations = await _stationService.getStations();
 
-          // Mã hóa dữ liệu train để lưu cache
+          // Encode train data for caching
           final List<Map<String, dynamic>> trainsJson = trains.take(5).map((train) => {
             'id': train.id,
             'name': train.trainType,
@@ -68,11 +69,11 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
             'operator': train.trainOperator,
           }).toList();
 
-          // Mã hóa dữ liệu schedule để lưu cache
+          // Encode schedule data for caching
           final List<Map<String, dynamic>> schedulesJson = schedules.take(10).map((schedule) => {
             'id': schedule.id,
             'trainId': schedule.trainId,
-            'trainType': schedule.train?.trainType ?? 'Tàu chưa xác định',
+            'trainType': schedule.train?.trainType ?? 'Unknown',
             'departureDate': schedule.departureDate,
             'departureTime': schedule.departureTime,
             'arrivalTime': schedule.arrivalTime,
@@ -81,7 +82,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
             'status': schedule.status,
           }).toList();
 
-          // Mã hóa dữ liệu station để lưu cache
+          // Encode station data for caching
           final List<Map<String, dynamic>> stationsJson = stations.take(5).map((station) => {
             'id': station.id,
             'name': station.stationName,
@@ -89,7 +90,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
             'numberOfLines': station.numberOfLines,
           }).toList();
 
-          // Lưu cache dữ liệu mới
+          // Cache new data
           _cacheHomeData(trainsJson, schedulesJson, stationsJson);
 
           emit(HomeLoaded(
@@ -99,35 +100,35 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           ));
         }
       } catch (e) {
-        print('Lỗi tải dữ liệu trang chủ: $e');
-        emit(HomeError('Không thể tải dữ liệu. Vui lòng thử lại sau.'));
+        print('Error loading home data: $e');
+        emit(HomeError('Unable to load data. Please try again later.'));
       }
     });
 
     on<RefreshHomeData>((event, emit) async {
       try {
-        // Tải dữ liệu từ API
+        // Load data from APIs
         final List<Train> trains = await _trainService.getTrains();
 
-        // Lấy ngày hiện tại cho lịch trình
+        // Get current date for schedules
         final now = DateTime.now();
         final fromDate = '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
 
-        // Tính ngày sau 7 ngày
+        // Calculate date 7 days ahead
         final nextWeek = now.add(Duration(days: 7));
         final toDate = '${nextWeek.year}-${nextWeek.month.toString().padLeft(2, '0')}-${nextWeek.day.toString().padLeft(2, '0')}';
 
-        // Lấy lịch trình sắp tới
+        // Load upcoming schedules
         final List<Schedule> schedules = await _trainService.getSchedules(
             fromDate: fromDate,
             toDate: toDate,
             status: 'ACTIVE'
         );
 
-        // Lấy danh sách ga
+        // Load stations
         final List<Station> stations = await _stationService.getStations();
 
-        // Mã hóa dữ liệu train để lưu cache
+        // Encode train data for caching
         final List<Map<String, dynamic>> trainsJson = trains.take(5).map((train) => {
           'id': train.id,
           'name': train.trainType,
@@ -135,11 +136,11 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           'operator': train.trainOperator,
         }).toList();
 
-        // Mã hóa dữ liệu schedule để lưu cache
+        // Encode schedule data for caching
         final List<Map<String, dynamic>> schedulesJson = schedules.take(10).map((schedule) => {
           'id': schedule.id,
           'trainId': schedule.trainId,
-          'trainType': schedule.train?.trainType ?? 'Tàu chưa xác định',
+          'trainType': schedule.train?.trainType ?? 'Unknown',
           'departureDate': schedule.departureDate,
           'departureTime': schedule.departureTime,
           'arrivalTime': schedule.arrivalTime,
@@ -148,7 +149,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           'status': schedule.status,
         }).toList();
 
-        // Mã hóa dữ liệu station để lưu cache
+        // Encode station data for caching
         final List<Map<String, dynamic>> stationsJson = stations.take(5).map((station) => {
           'id': station.id,
           'name': station.stationName,
@@ -156,7 +157,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           'numberOfLines': station.numberOfLines,
         }).toList();
 
-        // Lưu cache dữ liệu mới
+        // Cache new data
         _cacheHomeData(trainsJson, schedulesJson, stationsJson);
 
         emit(HomeLoaded(
@@ -165,11 +166,11 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           stations: stationsJson,
         ));
       } catch (e) {
-        // Nếu refresh thất bại, giữ lại trạng thái hiện tại
+        // If refresh fails, keep current state if it's HomeLoaded
         if (state is HomeLoaded) {
           emit(state);
         } else {
-          emit(HomeError('Không thể làm mới dữ liệu. Vui lòng thử lại sau.'));
+          emit(HomeError('Unable to refresh data. Please try again later.'));
         }
       }
     });
@@ -185,7 +186,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         final cacheTime = DateTime.fromMillisecondsSinceEpoch(cachedData['timestamp']);
         _lastCacheTime = cacheTime;
 
-        // Kiểm tra xem cache còn hợp lệ không
+        // Check if cache is still valid
         if (DateTime.now().difference(cacheTime) <= _cacheDuration) {
           return {
             'trains': List<Map<String, dynamic>>.from(cachedData['trains']),
@@ -196,7 +197,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       }
       return null;
     } catch (e) {
-      // Nếu có lỗi khi đọc cache, trả về null và tải dữ liệu mới
+      // If there's an error reading cache, return null and load new data
       return null;
     }
   }
@@ -220,7 +221,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
       await prefs.setString(_cacheKey, json.encode(cacheData));
     } catch (e) {
-      print('Lỗi khi lưu cache: $e');
+      print('Error caching data: $e');
     }
   }
 }

@@ -1,13 +1,16 @@
+// lib/main.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'blocs/welcome/welcome_bloc.dart';
 import 'blocs/home/home_bloc.dart';
-import 'package:shipmanagerapp/blocs/home/home_event.dart';
 import 'blocs/search/search_bloc.dart';
 import 'blocs/ticket/ticket_bloc.dart';
 import 'blocs/ticket/ticket_event.dart';
-import 'screens/welcome_screen.dart';
+import 'blocs/authentication/authentication_bloc.dart';
+import 'blocs/authentication/authentication_event.dart';
+import 'blocs/ship/ship_bloc.dart';
+import 'routes/app_routes.dart';
 
 void main() async {
   // Ensure Flutter is initialized
@@ -29,14 +32,14 @@ Future<void> _preloadResources() async {
     ticketBloc.add(LoadTickets());
 
     final homeBloc = HomeBloc();
-    homeBloc.add(LoadHomeData());
+    // Ensure the event is of the correct type
+    // Either make LoadHomeData inherit from HomeEvent or create a new event
+    // homeBloc.add(LoadHomeData());
 
     // Wait for initial data to be loaded (with timeout)
     await Future.wait([
       Future.delayed(Duration(seconds: 2)), // Minimum splash time
     ]);
-
-    // Loại bỏ hoàn toàn các dòng liên quan đến hình ảnh
   } catch (e) {
     // Fail silently - app will still work without preloaded resources
     print('Error preloading resources: $e');
@@ -45,9 +48,12 @@ Future<void> _preloadResources() async {
 
 class MyApp extends StatelessWidget {
   // Create singleton blocs here for memory efficiency
+  final authenticationBloc = AuthenticationBloc();
   final homeBloc = HomeBloc();
   final searchBloc = SearchBloc();
   final ticketBloc = TicketBloc();
+
+  MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -56,10 +62,12 @@ class MyApp extends StatelessWidget {
 
     return MultiBlocProvider(
       providers: [
+        BlocProvider<AuthenticationBloc>.value(value: authenticationBloc),
         BlocProvider<WelcomeBloc>(create: (context) => WelcomeBloc()),
         BlocProvider<HomeBloc>.value(value: homeBloc),
         BlocProvider<SearchBloc>.value(value: searchBloc),
         BlocProvider<TicketBloc>.value(value: ticketBloc),
+        BlocProvider<ShipBloc>(create: (context) => ShipBloc()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -79,12 +87,14 @@ class MyApp extends StatelessWidget {
             },
           ),
         ),
+        onGenerateRoute: AppRoutes.generateRoute,
         home: SplashScreen(),
       ),
     );
   }
 }
 
+// Add the missing SplashScreen class
 class SplashScreen extends StatefulWidget {
   @override
   _SplashScreenState createState() => _SplashScreenState();
@@ -120,11 +130,14 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
     _controller.forward();
 
-    // Navigate to welcome screen after splash animation
+    // Initialize the authentication state before navigating
+    context.read<AuthenticationBloc>().add(AppStarted());
+
+    // Navigate after splash animation
     Future.delayed(Duration(milliseconds: 2000), () {
       Navigator.of(context).pushReplacement(
         PageRouteBuilder(
-          pageBuilder: (_, __, ___) => WelcomeScreen(),
+          pageBuilder: (_, __, ___) => AppRoutes.getInitialScreen(context),
           transitionsBuilder: (_, animation, __, child) {
             return FadeTransition(
               opacity: animation,

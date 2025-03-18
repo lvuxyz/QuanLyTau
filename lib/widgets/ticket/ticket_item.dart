@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import '../../models/ticket.dart';
 
 class TicketItem extends StatelessWidget {
-  final Map<String, dynamic> ticket;
+  final Ticket ticket;
   final Color statusColor;
   final VoidCallback? onCancelPressed;
   final VoidCallback? onTap;
@@ -43,7 +44,7 @@ class TicketItem extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        ticket['name'] ?? 'Demo tên tàu',
+                        "${ticket.departureStation} → ${ticket.arrivalStation}",
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -59,7 +60,7 @@ class TicketItem extends StatelessWidget {
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
-                        ticket['status'] ?? '',
+                        ticket.status,
                         style: TextStyle(
                           color: statusColor,
                           fontSize: 12,
@@ -82,7 +83,7 @@ class TicketItem extends StatelessWidget {
                         Icon(Icons.access_time, color: Colors.white.withOpacity(0.7), size: 16),
                         SizedBox(width: 4),
                         Text(
-                          ticket['time'] ?? 'Thời gian',
+                          ticket.departureTime,
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 14,
@@ -92,10 +93,10 @@ class TicketItem extends StatelessWidget {
                     ),
                     Row(
                       children: [
-                        Icon(Icons.location_on, color: Colors.white.withOpacity(0.7), size: 16),
+                        Icon(Icons.airline_seat_recline_normal, color: Colors.white.withOpacity(0.7), size: 16),
                         SizedBox(width: 4),
                         Text(
-                          ticket['location'] ?? 'địa điểm',
+                          "Ghế: ${ticket.seatNumber}",
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 14,

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../blocs/home/home_bloc.dart';
+import '../blocs/home/home_event.dart';
 import '../blocs/home/home_state.dart';
 import '../blocs/ship/ship_bloc.dart';
 import 'ship_management_screen.dart';
@@ -31,8 +32,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   @override
   void initState() {
     super.initState();
-    // Make sure the event is properly defined
-    // context.read<HomeBloc>().add(LoadHomeData());
+    // Load home data when the dashboard is first opened
+    context.read<HomeBloc>().add(LoadHomeData());
   }
 
   @override
@@ -47,8 +48,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () {
-              // Make sure the event is properly defined
-              // context.read<HomeBloc>().add(RefreshHomeData());
+              // Properly refresh home data
+              context.read<HomeBloc>().add(RefreshHomeData());
             },
           ),
           IconButton(
@@ -168,7 +169,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
-  // Add the missing method for error view
   Widget _buildErrorView(String message) {
     return Center(
       child: Column(
@@ -188,8 +188,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           SizedBox(height: 24),
           ElevatedButton(
             onPressed: () {
-              // Make sure to use the correct HomeEvent
-              // context.read<HomeBloc>().add(LoadHomeData());
+              // Properly reload home data
+              context.read<HomeBloc>().add(LoadHomeData());
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF13B8A8),
@@ -226,7 +226,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     }
   }
 
-  // Add the missing method for overview content
   Widget _buildOverviewContent(HomeLoaded state) {
     return SingleChildScrollView(
       padding: EdgeInsets.all(16),
@@ -322,7 +321,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
-  // Add the missing method for statistics content
   Widget _buildStatisticsContent(HomeLoaded state) {
     return Center(
       child: Column(
@@ -355,7 +353,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
-  // Add the missing helper methods
   Widget _buildStatCard({
     required String title,
     required String value,

@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shipmanagerapp/models/ticket.dart';
 import '../blocs/ticket/ticket_bloc.dart';
 import '../blocs/ticket/ticket_event.dart';
 import '../blocs/ticket/ticket_state.dart';
 import '../widgets/home/custom_bottom_nav_bar.dart';
 import '../widgets/ticket/ticket_item.dart';
+import '../widgets/loading_indicator.dart';
+import '../widgets/error_message.dart';
 
 class TicketScreen extends StatefulWidget {
   @override
@@ -45,22 +48,53 @@ class _TicketScreenState extends State<TicketScreen> with SingleTickerProviderSt
             icon: Icon(Icons.notifications_none, color: Colors.white),
             onPressed: () {},
           ),
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () {
+              context.read<TicketBloc>().add(LoadUserTickets());
+            },
+          ),
         ],
       ),
       body: BlocBuilder<TicketBloc, TicketState>(
         builder: (context, state) {
           if (state is TicketInitial) {
-            context.read<TicketBloc>().add(LoadTickets());
-            return _buildLoadingView();
+            context.read<TicketBloc>().add(LoadUserTickets());
+            return const LoadingIndicator();
           } else if (state is TicketLoading) {
-            return _buildLoadingView();
-          } else if (state is TicketLoaded) {
-            return _buildLoadedView(state);
+            return const LoadingIndicator();
           } else if (state is TicketError) {
-            return _buildErrorView(state.message);
+            return ErrorMessage(message: state.message);
+          } else if (state is UserTicketsLoaded) {
+            if (state.tickets.isEmpty) {
+              return Padding(
+                padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.confirmation_number_outlined,
+                        size: 64,
+                        color: Colors.grey[400],
+                      ),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Bạn chưa có vé nào',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
+            return _buildLoadedView(state);
           }
 
-          return _buildLoadingView();
+          return const LoadingIndicator();
         },
       ),
       bottomNavigationBar: const CustomBottomNavBar(currentIndex: 2),
@@ -69,6 +103,7 @@ class _TicketScreenState extends State<TicketScreen> with SingleTickerProviderSt
 
   Widget _buildHeader() {
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
         CircleAvatar(
           radius: 16,
@@ -84,26 +119,30 @@ class _TicketScreenState extends State<TicketScreen> with SingleTickerProviderSt
           ),
         ),
         SizedBox(width: 8),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              "Chào, Admin",
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
+        Flexible(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                "Chào, Admin",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
-            ),
-            Text(
-              "Hôm nay bạn khỏe không?",
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.7),
-                fontSize: 12,
+              Text(
+                "Hôm nay bạn khỏe không?",
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.7),
+                  fontSize: 12,
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ],
     );
@@ -145,68 +184,7 @@ class _TicketScreenState extends State<TicketScreen> with SingleTickerProviderSt
     );
   }
 
-  Widget _buildLoadingView() {
-    return Column(
-      children: [
-        _buildTabBar(),
-        Expanded(
-          child: Center(
-            child: CircularProgressIndicator(
-              color: const Color(0xFF13B8A8),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildErrorView(String message) {
-    return Column(
-      children: [
-        _buildTabBar(),
-        Expanded(
-          child: Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.error_outline,
-                  color: Colors.red,
-                  size: 48,
-                ),
-                SizedBox(height: 16),
-                Text(
-                  message,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(height: 24),
-                ElevatedButton(
-                  onPressed: () {
-                    context.read<TicketBloc>().add(LoadTickets());
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF13B8A8),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                  ),
-                  child: Text('Thử lại'),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildLoadedView(TicketLoaded state) {
+  Widget _buildLoadedView(UserTicketsLoaded state) {
     return Column(
       children: [
         _buildTabBar(),
@@ -216,7 +194,7 @@ class _TicketScreenState extends State<TicketScreen> with SingleTickerProviderSt
             color: const Color(0xFF13B8A8),
             backgroundColor: Color(0xFF333333),
             onRefresh: () async {
-              context.read<TicketBloc>().add(RefreshTickets());
+              context.read<TicketBloc>().add(RefreshUserTickets());
               return await Future.delayed(Duration(milliseconds: 800));
             },
             child: TabBarView(
@@ -225,7 +203,7 @@ class _TicketScreenState extends State<TicketScreen> with SingleTickerProviderSt
                 // Đã đặt tab
                 _buildTicketList(
                   context: context,
-                  tickets: state.bookedTickets,
+                  tickets: state.tickets.where((ticket) => ticket.status == 'ACTIVE').toList(),
                   statusColor: const Color(0xFF13B8A8),
                   emptyMessage: 'Bạn chưa có vé nào đã đặt',
                 ),
@@ -233,7 +211,7 @@ class _TicketScreenState extends State<TicketScreen> with SingleTickerProviderSt
                 // Hoàn thành tab
                 _buildTicketList(
                   context: context,
-                  tickets: state.completedTickets,
+                  tickets: state.tickets.where((ticket) => ticket.status == 'COMPLETED').toList(),
                   statusColor: Colors.blue,
                   emptyMessage: 'Bạn chưa có vé nào đã hoàn thành',
                 ),
@@ -241,7 +219,7 @@ class _TicketScreenState extends State<TicketScreen> with SingleTickerProviderSt
                 // Đã hủy tab
                 _buildTicketList(
                   context: context,
-                  tickets: state.canceledTickets,
+                  tickets: state.tickets.where((ticket) => ticket.status == 'CANCELED').toList(),
                   statusColor: Colors.red,
                   emptyMessage: 'Bạn chưa có vé nào đã hủy',
                 ),
@@ -255,17 +233,33 @@ class _TicketScreenState extends State<TicketScreen> with SingleTickerProviderSt
 
   Widget _buildTicketList({
     required BuildContext context,
-    required List<Map<String, dynamic>> tickets,
+    required List<Ticket> tickets,
     required Color statusColor,
     required String emptyMessage,
   }) {
     if (tickets.isEmpty) {
       return Center(
-        child: Text(
-          emptyMessage,
-          style: TextStyle(
-            color: Colors.white.withOpacity(0.7),
-            fontSize: 16,
+        child: Padding(
+          padding: const EdgeInsets.only(bottom: 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.confirmation_number_outlined,
+                size: 48,
+                color: Colors.grey[400],
+              ),
+              const SizedBox(height: 12),
+              Text(
+                emptyMessage,
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.7),
+                  fontSize: 14,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
           ),
         ),
       );
@@ -286,8 +280,8 @@ class _TicketScreenState extends State<TicketScreen> with SingleTickerProviderSt
             child: TicketItem(
               ticket: ticket,
               statusColor: statusColor,
-              onCancelPressed: ticket['status'] == 'đã đặt'
-                  ? () => _showCancelConfirmation(context, ticket['id'])
+              onCancelPressed: ticket.status == 'ACTIVE'
+                  ? () => _showCancelConfirmation(context, ticket.id)
                   : null,
               onTap: () {
                 // Show ticket details
@@ -323,7 +317,7 @@ class _TicketScreenState extends State<TicketScreen> with SingleTickerProviderSt
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
-              context.read<TicketBloc>().add(CancelTicket(ticketId));
+              context.read<TicketBloc>().add(CancelTicket(ticketId: ticketId));
             },
             child: Text(
               'Xác nhận',

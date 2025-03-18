@@ -2,13 +2,14 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io' show Platform;
+import 'api_service.dart';
 
-class AuthService {
+class AuthService extends ApiService {
   bool get isAndroid => Platform.isAndroid;
 
   String get baseUrl {
     if (Platform.isAndroid) {
-      return 'http://192.19.14.24:3000/api/v1'; // Sử dụng địa chỉ IP thực tế của máy tính trong mạng WiFi
+      return 'http://192.168.2.37:3000/api/v1'; // Sử dụng địa chỉ IP thực tế của máy tính trong mạng WiFi
     } else {
       return 'http://localhost:3000/api/v1'; // Cho iOS hoặc Web
     }
@@ -19,88 +20,69 @@ class AuthService {
     'Accept': 'application/json',
   };
 
+  // Login method
   Future<Map<String, dynamic>> login(String username, String password) async {
+    return await post('auth/login', {
+      'username': username,
+      'password': password
+    }, requiresAuth: false);
+  }
+
+  // Register method
+  Future<Map<String, dynamic>> register(Map<String, dynamic> userData) async {
+    return await post('auth/register', userData, requiresAuth: false);
+  }
+
+  // Logout method
+  Future<Map<String, dynamic>> logout() async {
     try {
-      print('🔍 Đang thử đăng nhập với tên người dùng: $username');
-
-      // Gửi yêu cầu HTTP đến máy chủ
-      final response = await http.post(
-        Uri.parse('$baseUrl/auth/login'),
-        headers: _headers,
-        body: json.encode({
-          'username': username,
-          'password': password,
-        }),
-      );
-
-      print('📥 Trạng thái phản hồi: ${response.statusCode}');
-      print('📥 Nội dung phản hồi: ${response.body}');
-
-      if (response.statusCode == 200) {
-        final responseData = json.decode(response.body);
-
-        if (responseData['success'] == true) {
-          final data = responseData['data'];
-
-          // Kiểm tra nếu `data` là null hoặc không chứa `token`
-          if (data == null || !data.containsKey('token')) {
-            return {
-              'success': false,
-              'message': 'Phản hồi API không hợp lệ (thiếu dữ liệu)'
-            };
-          }
-
-          // Lưu token
-          await _saveToken(data['token']);
-
-          return {
-            'success': true,
-            'data': data
-          };
-        } else {
-          return {
-            'success': false,
-            'message': responseData['message'] ?? 'Đăng nhập thất bại'
-          };
-        }
-      } else {
-        return {
-          'success': false,
-          'message': _handleErrorResponse(response)
-        };
-      }
-
-      // Giữ lại hệ thống giả lập như fallback cho trường hợp máy chủ không hoạt động
-      /*
-      if (username.isNotEmpty && password.isNotEmpty) {
-        await Future.delayed(Duration(seconds: 1));
-        final userData = {
-          'id': '1',
-          'username': username,
-          'email': '$username@example.com',
-          'name': 'Test User',
-          'role': 'admin',
-          'token': 'mock_jwt_token_${DateTime.now().millisecondsSinceEpoch}',
-        };
-        await _saveToken(userData['token']!);
-        return {
-          'success': true,
-          'data': userData
-        };
-      } else {
-        return {
-          'success': false,
-          'message': 'Tài khoản hoặc mật khẩu không được để trống'
-        };
-      }
-      */
+      // Gọi API logout nếu cần
+      final result = await post('auth/logout', {});
+      
+      // Xóa token bất kể API thành công hay thất bại
+      await _deleteToken();
+      
+      return result;
     } catch (e) {
-      print('❌ Lỗi đăng nhập: $e');
+      print('❌ Lỗi đăng xuất: $e');
+      // Xóa token ngay cả khi có lỗi
+      await _deleteToken();
       return {
-        'success': false,
-        'message': 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng'
+        'success': true,
+        'message': 'Đã đăng xuất khỏi thiết bị'
       };
     }
+  }
+
+  // Forgot password method
+  Future<Map<String, dynamic>> forgotPassword(String email) async {
+    return await post('auth/forgot-password', {'email': email}, requiresAuth: false);
+  }
+
+  // Reset password method
+  Future<Map<String, dynamic>> resetPassword(String token, String newPassword) async {
+    return await post('auth/reset-password', {
+      'token': token,
+      'password': newPassword
+    }, requiresAuth: false);
+  }
+
+  // Change password method
+  Future<Map<String, dynamic>> changePassword(String currentPassword, String newPassword) async {
+    return await put('auth/change-password', {
+      'currentPassword': currentPassword,
+      'newPassword': newPassword
+    });
+  }
+
+  // Get current user profile
+  Future<Map<String, dynamic>> getUserProfile() async {
+    return await get('auth/profile');
+  }
+
+  // Update user profile
+  Future<Map<String, dynamic>> updateUserProfile(Map<String, dynamic> profileData) async {
+    return await put('auth/profile', profileData);
   }
 
   String _handleErrorResponse(http.Response response) {
@@ -120,5 +102,19 @@ class AuthService {
     } catch (e) {
       print('❌ Lỗi khi lưu token: $e');
     }
+  }
+
+  Future<void> _deleteToken() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('auth_token');
+      print('✅ Token đã được xóa thành công');
+    } catch (e) {
+      print('❌ Lỗi khi xóa token: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>> refreshToken() async {
+    return await post('auth/refresh-token', {}, requiresAuth: true);
   }
 }

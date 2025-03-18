@@ -55,7 +55,7 @@ class SchedulesSection extends StatelessWidget {
             : ListView.builder(
           shrinkWrap: true,
           physics: NeverScrollableScrollPhysics(),
-          itemCount: schedules.length,
+          itemCount: schedules.length > 2 ? 2 : schedules.length,
           itemBuilder: (context, index) {
             return _buildScheduleCard(context, schedules[index]);
           },

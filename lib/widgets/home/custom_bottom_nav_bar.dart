@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shipmanagerapp/screens/home_screen.dart';
 import 'package:shipmanagerapp/screens/search_screen.dart';
 import 'package:shipmanagerapp/screens/ticket_screen.dart';
+import 'package:shipmanagerapp/screens/profile_screen.dart';
 import 'package:shipmanagerapp/utils/custom_route.dart';
 
 class CustomBottomNavBar extends StatelessWidget {
@@ -90,7 +91,15 @@ class CustomBottomNavBar extends StatelessWidget {
               label: "Profile",
               isActive: currentIndex == 3,
               onTap: () {
-                // To be implemented
+                if (currentIndex != 3) {
+                  Navigator.pushReplacement(
+                    context,
+                    SlidePageRoute(
+                      page: ProfileScreen(),
+                      direction: SlideDirection.fromRight,
+                    ),
+                  );
+                }
               },
             ),
           ],

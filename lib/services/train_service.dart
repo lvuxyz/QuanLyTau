@@ -39,14 +39,62 @@ class TrainService extends ApiService {
   // Get all trains
   Future<List<Train>> getTrains() async {
     try {
-      final result = await get('trains');
-
-      if (result['success'] == true && result['data'] != null) {
-        return (result['data'] as List)
-            .map((item) => Train.fromJson(item as Map<String, dynamic>))
-            .toList();
-      }
-      return [];
+      // Simulate API delay
+      await Future.delayed(Duration(milliseconds: 800));
+      
+      // Return mock data
+      return [
+        Train(
+          id: "1",
+          trainType: "PASSENGER",
+          trainOperator: "Vietnam Railways",
+          capacity: 320,
+          status: "ACTIVE",
+          route: "Hà Nội - TP.HCM",
+          amenities: ["WiFi", "Food Service", "Air Conditioning"],
+          lastMaintenanceDate: "2023-04-15",
+        ),
+        Train(
+          id: "2",
+          trainType: "PASSENGER",
+          trainOperator: "Vietnam Railways",
+          capacity: 320,
+          status: "ACTIVE",
+          route: "TP.HCM - Hà Nội",
+          amenities: ["WiFi", "Food Service", "Air Conditioning"],
+          lastMaintenanceDate: "2023-04-10",
+        ),
+        Train(
+          id: "3",
+          trainType: "PASSENGER",
+          trainOperator: "Vietnam Railways",
+          capacity: 280,
+          status: "ACTIVE",
+          route: "Hà Nội - Đà Nẵng",
+          amenities: ["WiFi", "Air Conditioning"],
+          lastMaintenanceDate: "2023-04-20",
+        ),
+        Train(
+          id: "4",
+          trainType: "PASSENGER",
+          trainOperator: "Vietnam Railways",
+          capacity: 280,
+          status: "ACTIVE",
+          route: "Đà Nẵng - Hà Nội",
+          amenities: ["WiFi", "Air Conditioning"],
+          lastMaintenanceDate: "2023-04-25",
+        ),
+        Train(
+          id: "5",
+          trainType: "EXPRESS",
+          trainOperator: "Vietnam Railways",
+          capacity: 240,
+          status: "ACTIVE",
+          route: "Hà Nội - TP.HCM",
+          amenities: ["WiFi", "Premium Food Service", "Air Conditioning", "Power Outlets"],
+          lastMaintenanceDate: "2023-05-05",
+        ),
+      ];
     } catch (e) {
       print('Error getting trains: $e');
       return [];
@@ -105,31 +153,72 @@ class TrainService extends ApiService {
     String? status,
   }) async {
     try {
-      // Build query parameters
-      final queryParams = <String, String>{};
-      if (trainId != null) queryParams['train_id'] = trainId;
-      if (departureStation != null) queryParams['departure_station'] = departureStation;
-      if (arrivalStation != null) queryParams['arrival_station'] = arrivalStation;
-      if (fromDate != null) queryParams['from_date'] = fromDate;
-      if (toDate != null) queryParams['to_date'] = toDate;
-      if (status != null) queryParams['status'] = status;
-
-      String endpoint = 'schedules';
-      if (queryParams.isNotEmpty) {
-        final queryString = queryParams.entries
-            .map((e) => '${e.key}=${Uri.encodeComponent(e.value)}')
-            .join('&');
-        endpoint = '$endpoint?$queryString';
-      }
-
-      final result = await get(endpoint);
-
-      if (result['success'] == true && result['data'] != null) {
-        return (result['data'] as List)
-            .map((item) => Schedule.fromJson(item as Map<String, dynamic>))
-            .toList();
-      }
-      return [];
+      // Simulate API delay
+      await Future.delayed(Duration(milliseconds: 800));
+      
+      // Return mock schedules
+      return [
+        Schedule(
+          id: "1",
+          trainId: "1",
+          trainName: "SE1",
+          departureStation: "Ga Hà Nội",
+          arrivalStation: "Ga Sài Gòn",
+          departureTime: "08:00",
+          arrivalTime: "18:30",
+          departureDate: "2023-05-20",
+          price: 1200000,
+          status: "ACTIVE",
+        ),
+        Schedule(
+          id: "2",
+          trainId: "2",
+          trainName: "SE2",
+          departureStation: "Ga Sài Gòn",
+          arrivalStation: "Ga Hà Nội",
+          departureTime: "20:00",
+          arrivalTime: "06:30",
+          departureDate: "2023-05-20",
+          price: 1200000,
+          status: "ACTIVE",
+        ),
+        Schedule(
+          id: "3",
+          trainId: "3",
+          trainName: "SE3",
+          departureStation: "Ga Hà Nội",
+          arrivalStation: "Ga Đà Nẵng",
+          departureTime: "09:30",
+          arrivalTime: "15:45",
+          departureDate: "2023-05-21",
+          price: 750000,
+          status: "ACTIVE",
+        ),
+        Schedule(
+          id: "4",
+          trainId: "4",
+          trainName: "SE4",
+          departureStation: "Ga Đà Nẵng",
+          arrivalStation: "Ga Hà Nội",
+          departureTime: "08:00",
+          arrivalTime: "14:15",
+          departureDate: "2023-05-22",
+          price: 750000,
+          status: "ACTIVE",
+        ),
+        Schedule(
+          id: "5",
+          trainId: "5",
+          trainName: "SE5",
+          departureStation: "Ga Hà Nội",
+          arrivalStation: "Ga Sài Gòn",
+          departureTime: "17:30",
+          arrivalTime: "03:15",
+          departureDate: "2023-05-23",
+          price: 1450000,
+          status: "ACTIVE",
+        ),
+      ];
     } catch (e) {
       print('Error getting schedules: $e');
       return [];

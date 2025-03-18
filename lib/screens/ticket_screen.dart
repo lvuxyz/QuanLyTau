@@ -110,7 +110,7 @@ class _TicketScreenState extends State<TicketScreen> with SingleTickerProviderSt
           backgroundColor: Colors.grey[800],
           child: ClipOval(
             child: Image.asset(
-              'assets/images/user_avatar.png',
+              'assets/images/user_avatar.jpg',
               fit: BoxFit.cover,
               errorBuilder: (context, error, stackTrace) {
                 return Icon(Icons.person, color: Colors.white);

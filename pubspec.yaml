@@ -1,6 +1,6 @@
 name: shipmanagerapp
 description: "A new Flutter project."
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
 version: 1.0.0+1
 
@@ -15,22 +15,20 @@ dependencies:
   google_fonts: ^3.0.1
   cached_network_image: ^3.2.2
   shared_preferences: ^2.2.1
-  equatable: ^2.0.5         # For easy state comparison
-  provider: ^6.0.5          # For state management
-  hive: ^2.2.3              # For local storage
-  hive_flutter: ^1.1.0      # Hive for Flutter
-  flutter_slidable: ^3.0.0  # For swipeable list items
-  fl_chart: ^0.62.0         # For charts and graphs
-  path_provider: ^2.0.15    # For file system access
-  http: ^0.13.6             # For API requests
-  flutter_svg: ^2.0.5       # For SVG support
-  shimmer: ^3.0.0           # For loading effects
-  url_launcher: ^6.1.11     # For launching URLs
+  equatable: ^2.0.5 # For easy state comparison
+  provider: ^6.0.5 # For state management
+  hive: ^2.2.3 # For local storage
+  hive_flutter: ^1.1.0 # Hive for Flutter
+  flutter_slidable: ^3.0.0 # For swipeable list items
+  fl_chart: ^0.62.0 # For charts and graphs
+  path_provider: ^2.0.15 # For file system access
+  http: ^0.13.6 # For API requests
+  flutter_svg: ^2.0.5 # For SVG support
+  shimmer: ^3.0.0 # For loading effects
+  url_launcher: ^6.1.11 # For launching URLs
   connectivity_plus: ^4.0.1 # For network connectivity detection
   flutter_localizations:
     sdk: flutter
-
-
 
 dev_dependencies:
   flutter_test:
@@ -38,5 +36,7 @@ dev_dependencies:
   flutter_lints: ^4.0.0
 
 flutter:
-
   uses-material-design: true
+
+  assets:
+    - assets/images/

@@ -39,15 +39,62 @@ class StationService extends ApiService {
   // Get all stations
   Future<List<Station>> getStations() async {
     try {
-      final result = await get(_baseEndpoint);
-      print('API Response: $result'); // Debug log
-
-      if (result['success'] == true && result['data'] != null) {
-        return (result['data'] as List)
-            .map((item) => Station.fromJson(item as Map<String, dynamic>))
-            .toList();
-      }
-      return [];
+      // Simulate API delay
+      await Future.delayed(Duration(milliseconds: 800));
+      
+      // Return mock data instead of API call
+      return [
+        Station(
+          id: "1",
+          stationName: "Ga Hà Nội",
+          location: "120 Lê Duẩn, Hà Nội",
+          code: "HAN",
+          numberOfLines: 5,
+          facilities: "Wifi, Nhà hàng, Phòng chờ VIP",
+          operatingHours: "04:00 - 22:00",
+          contactInfo: "024 3825 3949",
+        ),
+        Station(
+          id: "2",
+          stationName: "Ga Đà Nẵng",
+          location: "200 Hải Phòng, Đà Nẵng",
+          code: "DAN",
+          numberOfLines: 3,
+          facilities: "Wifi, Quầy ăn nhanh",
+          operatingHours: "05:00 - 21:00",
+          contactInfo: "0236 3823 070",
+        ),
+        Station(
+          id: "3",
+          stationName: "Ga Sài Gòn",
+          location: "1 Nguyễn Thông, Quận 3, TP.HCM",
+          code: "SGN",
+          numberOfLines: 6,
+          facilities: "Wifi, Nhà hàng, Phòng chờ VIP, Dịch vụ hành lý",
+          operatingHours: "04:30 - 23:00",
+          contactInfo: "028 3846 6091",
+        ),
+        Station(
+          id: "4",
+          stationName: "Ga Huế",
+          location: "2 Bùi Thị Xuân, Huế",
+          code: "HUE",
+          numberOfLines: 2,
+          facilities: "Wifi, Quầy ăn nhanh",
+          operatingHours: "05:30 - 20:00",
+          contactInfo: "0234 3822 175",
+        ),
+        Station(
+          id: "5",
+          stationName: "Ga Nha Trang",
+          location: "17 Thái Nguyên, Nha Trang",
+          code: "NTR",
+          numberOfLines: 2,
+          facilities: "Wifi, Quầy cafe",
+          operatingHours: "05:00 - 21:30",
+          contactInfo: "0258 3822 113",
+        ),
+      ];
     } catch (e) {
       print('Error getting stations: $e');
       return [];

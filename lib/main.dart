@@ -170,20 +170,22 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     // Initialize the authentication state before navigating
     context.read<AuthenticationBloc>().add(AppStarted());
 
-    // Navigate after splash animation
+    // Navigate after splash animation with mounted check
     Future.delayed(Duration(milliseconds: 2000), () {
-      Navigator.of(context).pushReplacement(
-        PageRouteBuilder(
-          pageBuilder: (_, __, ___) => AppRoutes.getInitialScreen(context),
-          transitionsBuilder: (_, animation, __, child) {
-            return FadeTransition(
-              opacity: animation,
-              child: child,
-            );
-          },
-          transitionDuration: Duration(milliseconds: 500),
-        ),
-      );
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          PageRouteBuilder(
+            pageBuilder: (_, __, ___) => AppRoutes.getInitialScreen(context),
+            transitionsBuilder: (_, animation, __, child) {
+              return FadeTransition(
+                opacity: animation,
+                child: child,
+              );
+            },
+            transitionDuration: Duration(milliseconds: 500),
+          ),
+        );
+      }
     });
   }
 

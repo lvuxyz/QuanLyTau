@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import '../../models/ship.dart';
 
 abstract class ShipState extends Equatable {
   @override
@@ -10,7 +11,7 @@ class ShipInitial extends ShipState {}
 class ShipLoading extends ShipState {}
 
 class ShipsLoaded extends ShipState {
-  final List<Map<String, dynamic>> ships;
+  final List<Ship> ships;
 
   ShipsLoaded(this.ships);
 
@@ -34,4 +35,13 @@ class ShipOperationFailure extends ShipState {
 
   @override
   List<Object?> get props => [error];
+}
+
+class ShipDetailLoaded extends ShipState {
+  final Ship ship;
+
+  ShipDetailLoaded(this.ship);
+
+  @override
+  List<Object?> get props => [ship];
 }

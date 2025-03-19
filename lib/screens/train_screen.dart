@@ -243,7 +243,7 @@ class _TrainScreenState extends State<TrainScreen> {
                     ],
                   ),
                 ],
-                if (train.amenities != null && train.amenities.isNotEmpty) ...[
+                if (train.amenities != null && train.amenities!.isNotEmpty) ...[
                   SizedBox(height: 12),
                   Text(
                     'Tiện ích:',

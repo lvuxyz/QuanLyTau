@@ -13,7 +13,7 @@ class SearchHeader extends StatelessWidget {
           // User avatar
           CircleAvatar(
             radius: 20,
-            backgroundImage: AssetImage('assets/images/user_avatar.png'),
+            backgroundImage: AssetImage('assets/images/user_avatar.jpg'),
             onBackgroundImageError: (_, __) {},
             backgroundColor: Colors.grey[800],
             child: Icon(Icons.person, color: Colors.white, size: 24),

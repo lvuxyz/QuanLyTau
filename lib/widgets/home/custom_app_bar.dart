@@ -14,7 +14,7 @@ class CustomAppBar extends StatelessWidget {
             backgroundColor: Colors.grey[800], // Màu nền dự phòng
             child: ClipOval(
               child: Image.asset(
-                'assets/images/user_avatar.png',
+                'assets/images/user_avatar.jpg',
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
                   return Icon(Icons.person, color: Colors.white);

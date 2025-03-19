@@ -3,135 +3,78 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'ticket_event.dart';
 import 'ticket_state.dart';
+import '../../services/ticket_service.dart';
+import '../../models/ticket.dart';
 
 class TicketBloc extends Bloc<TicketEvent, TicketState> {
+  final TicketService _ticketService;
+
   // Static cache for ticket data
   static Map<String, dynamic>? _ticketCache;
   static DateTime? _lastCacheTime;
   static const _cacheDuration = Duration(minutes: 5);
   static const String _cacheKey = 'ticket_data_cache';
 
-  TicketBloc() : super(TicketInitial()) {
-    on<LoadTickets>((event, emit) async {
+  TicketBloc(this._ticketService) : super(TicketInitial()) {
+    on<LoadUserTickets>((event, emit) async {
       emit(TicketLoading());
       try {
-        // Check if memory cache is available and fresh
-        if (_ticketCache != null &&
-            _lastCacheTime != null &&
-            DateTime.now().difference(_lastCacheTime!) < _cacheDuration) {
-
-          // Use memory cached data for instant rendering
-          emit(TicketLoaded(
-            bookedTickets: _ticketCache!['booked'] as List<Map<String, dynamic>>,
-            completedTickets: _ticketCache!['completed'] as List<Map<String, dynamic>>,
-            canceledTickets: _ticketCache!['canceled'] as List<Map<String, dynamic>>,
-          ));
-
-          // Refresh cache in background without blocking UI
-          _refreshTicketCacheInBackground();
-          return;
-        }
-
-        // Try persistent cache
-        final persistentCache = await _loadCachedTickets();
-        if (persistentCache != null) {
-          _ticketCache = persistentCache;
-          _lastCacheTime = DateTime.now(); // Reset timer for memory cache
-
-          emit(TicketLoaded(
-            bookedTickets: persistentCache['booked'] as List<Map<String, dynamic>>,
-            completedTickets: persistentCache['completed'] as List<Map<String, dynamic>>,
-            canceledTickets: persistentCache['canceled'] as List<Map<String, dynamic>>,
-          ));
-
-          // Refresh cache in background
-          _refreshTicketCacheInBackground();
-          return;
-        }
-
-        // No cache or expired cache, fetch new data
-        final data = await _fetchTickets();
-
-        // Update caches
-        _updateTicketCaches(data);
-
-        emit(TicketLoaded(
-          bookedTickets: data['booked'] as List<Map<String, dynamic>>,
-          completedTickets: data['completed'] as List<Map<String, dynamic>>,
-          canceledTickets: data['canceled'] as List<Map<String, dynamic>>,
-        ));
+        final tickets = await _ticketService.getUserTickets();
+        emit(UserTicketsLoaded(tickets));
       } catch (e) {
-        emit(TicketError('Không thể tải danh sách vé. Vui lòng thử lại sau.'));
+        emit(TicketError(e.toString()));
       }
     });
 
-    on<RefreshTickets>((event, emit) async {
-      final currentState = state;
-      if (currentState is TicketLoaded) {
-        // Keep current data visible while refreshing
-        try {
-          // Fetch new data
-          final data = await _fetchTickets();
+    on<RefreshUserTickets>((event, emit) async {
+      try {
+        emit(TicketLoading());
+        final tickets = await _ticketService.getUserTickets();
+        emit(UserTicketsLoaded(tickets));
+      } catch (e) {
+        emit(TicketError(e.toString()));
+      }
+    });
 
-          // Update caches
-          _updateTicketCaches(data);
+    on<LoadAvailableSeats>((event, emit) async {
+      try {
+        emit(TicketLoading());
+        final seats = await _ticketService.getAvailableSeats(event.scheduleId);
+        emit(AvailableSeatsLoaded(seats));
+      } catch (e) {
+        emit(TicketError(e.toString()));
+      }
+    });
 
-          emit(TicketLoaded(
-            bookedTickets: data['booked'] as List<Map<String, dynamic>>,
-            completedTickets: data['completed'] as List<Map<String, dynamic>>,
-            canceledTickets: data['canceled'] as List<Map<String, dynamic>>,
-          ));
-        } catch (e) {
-          // On error, keep showing existing data
-          emit(currentState);
+    on<BookTicket>((event, emit) async {
+      try {
+        emit(TicketLoading());
+        final result = await _ticketService.bookTicket(event.ticketData);
+        if (result['success'] == true && result['data'] != null) {
+          final ticket = Ticket.fromJson(result['data']);
+          emit(TicketBooked(ticket));
+        } else {
+          emit(TicketError(result['message'] ?? 'Không thể đặt vé'));
         }
+      } catch (e) {
+        emit(TicketError(e.toString()));
       }
     });
 
     on<CancelTicket>((event, emit) async {
-      final currentState = state;
-      if (currentState is TicketLoaded) {
+      try {
         emit(TicketLoading());
-        try {
-          // Optimistic update - apply change immediately for responsive UI
-          final bookedTickets = List<Map<String, dynamic>>.from(currentState.bookedTickets);
-          final ticketIndex = bookedTickets.indexWhere((ticket) => ticket['id'] == event.ticketId);
-
-          if (ticketIndex != -1) {
-            final canceledTicket = Map<String, dynamic>.from(bookedTickets[ticketIndex]);
-            canceledTicket['status'] = 'đã hủy';
-
-            // Remove from booked list
-            bookedTickets.removeAt(ticketIndex);
-
-            // Add to canceled list
-            final canceledTickets = List<Map<String, dynamic>>.from(currentState.canceledTickets);
-            canceledTickets.add(canceledTicket);
-
-            // Update UI immediately
-            final newState = TicketLoaded(
-              bookedTickets: bookedTickets,
-              completedTickets: currentState.completedTickets,
-              canceledTickets: canceledTickets,
-            );
-
-            emit(newState);
-
-            // In a real app, make API call here to persist changes
-            await Future.delayed(Duration(milliseconds: 300));
-
-            // Update caches with new state
-            _updateTicketCaches({
-              'booked': bookedTickets,
-              'completed': currentState.completedTickets,
-              'canceled': canceledTickets,
-            });
-          } else {
-            emit(currentState);
-          }
-        } catch (e) {
-          emit(TicketError('Không thể hủy vé. Vui lòng thử lại sau.'));
+        final result = await _ticketService.cancelTicket(event.ticketId);
+        if (result['success'] == true) {
+          emit(TicketCancelled(event.ticketId));
+          // Reload user tickets after cancellation
+          final tickets = await _ticketService.getUserTickets();
+          emit(UserTicketsLoaded(tickets));
+        } else {
+          emit(TicketError(result['message'] ?? 'Không thể hủy vé'));
         }
+      } catch (e) {
+        emit(TicketError(e.toString()));
       }
     });
   }

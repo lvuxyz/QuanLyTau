@@ -54,7 +54,7 @@ class StationsSection extends StatelessWidget {
             : ListView.builder(
           shrinkWrap: true,
           physics: NeverScrollableScrollPhysics(),
-          itemCount: stations.length,
+          itemCount: stations.length > 2 ? 2 : stations.length,
           itemBuilder: (context, index) {
             return _buildStationCard(context, stations[index]);
           },

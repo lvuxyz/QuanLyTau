@@ -1,9 +1,12 @@
 // lib/routes/app_routes.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shipmanagerapp/services/ship_service.dart';
 import '../blocs/authentication/authentication_bloc.dart';
 import '../blocs/authentication/authentication_event.dart';
 import '../blocs/authentication/authentication_state.dart';
+import '../blocs/home/home_bloc.dart';
+import '../blocs/home/home_event.dart';
 import '../blocs/ship/ship_bloc.dart';
 import '../screens/welcome_screen.dart';
 import '../screens/login_screen.dart';
@@ -17,6 +20,10 @@ import '../screens/schedule_management_screen.dart';
 import '../screens/station_screen.dart';
 import '../screens/train_screen.dart';
 import '../screens/admin_dashboard_screen.dart';
+import '../screens/notification_screen.dart';
+import '../screens/issue_screen.dart';
+import '../screens/seat_config_screen.dart';
+import '../screens/schedule_screen.dart';
 import '../utils/custom_route.dart';
 
 class AppRoutes {
@@ -32,6 +39,10 @@ class AppRoutes {
   static const String stationManagement = '/station-management';
   static const String trainManagement = '/train-management';
   static const String adminDashboard = '/admin-dashboard';
+  static const String notification = '/notification';
+  static const String issue = '/issue';
+  static const String seatConfig = '/seat-config';
+  static const String schedule = '/schedule';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -52,7 +63,7 @@ class AppRoutes {
       case shipManagement:
         return FadePageRoute(
           page: BlocProvider(
-            create: (context) => ShipBloc(),
+            create: (context) => ShipBloc(shipService: context.read<ShipService>()),
             child: ShipManagementScreen(),
           ),
         );
@@ -64,6 +75,17 @@ class AppRoutes {
         return FadePageRoute(page: TrainScreen());
       case adminDashboard:
         return FadePageRoute(page: AdminDashboardScreen());
+      case notification:
+        return MaterialPageRoute(builder: (_) => const NotificationScreen());
+      case issue:
+        return MaterialPageRoute(builder: (_) => const IssueScreen());
+      case seatConfig:
+        final args = settings.arguments as Map<String, dynamic>?;
+        return MaterialPageRoute(
+          builder: (_) => SeatConfigScreen(trainId: args?['trainId']),
+        );
+      case schedule:
+        return MaterialPageRoute(builder: (_) => const ScheduleScreen());
       default:
         return MaterialPageRoute(
           builder: (_) => Scaffold(
@@ -80,6 +102,8 @@ class AppRoutes {
       builder: (context, state) {
         if (state is AuthenticationUninitialized) {
           context.read<AuthenticationBloc>().add(AppStarted());
+          // Ensure home data is loaded
+          context.read<HomeBloc>().add(LoadHomeData());
           return Scaffold(
             backgroundColor: Color(0xFF1A1A1A),
             body: Center(

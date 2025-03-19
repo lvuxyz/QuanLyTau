@@ -1,38 +1,92 @@
 // lib/models/schedule_stop.dart
 class ScheduleStop {
-  final String stopId;
+  final String id;
   final String scheduleId;
   final String stationId;
-  final String stationName;
-  final String? location;
   final String arrivalTime;
   final String departureTime;
   final int stopOrder;
-  final String? platformNumber;
+  final String? stationName;
+  final String? stationCode;
+  final String? createdAt;
+  final String? updatedAt;
 
   ScheduleStop({
-    required this.stopId,
+    required this.id,
     required this.scheduleId,
     required this.stationId,
-    required this.stationName,
-    this.location,
     required this.arrivalTime,
     required this.departureTime,
     required this.stopOrder,
-    this.platformNumber,
+    this.stationName,
+    this.stationCode,
+    this.createdAt,
+    this.updatedAt,
   });
 
   factory ScheduleStop.fromJson(Map<String, dynamic> json) {
     return ScheduleStop(
-      stopId: json['Stop_ID'].toString(),
-      scheduleId: json['Schedule_ID'].toString(),
-      stationId: json['Station_ID'].toString(),
-      stationName: json['Station_Name'] ?? '',
-      location: json['Location'],
-      arrivalTime: json['Arrival_Time'] ?? '',
-      departureTime: json['Departure_Time'] ?? '',
-      stopOrder: json['Stop_Order'] ?? 0,
-      platformNumber: json['Platform_Number'],
+      id: json['id'].toString(),
+      scheduleId: json['scheduleId'].toString(),
+      stationId: json['stationId'].toString(),
+      arrivalTime: json['arrivalTime'],
+      departureTime: json['departureTime'],
+      stopOrder: json['stopOrder'] is String 
+          ? int.tryParse(json['stopOrder']) ?? 0 
+          : json['stopOrder'] ?? 0,
+      stationName: json['stationName'],
+      stationCode: json['stationCode'],
+      createdAt: json['createdAt'],
+      updatedAt: json['updatedAt'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = {
+      'id': id,
+      'scheduleId': scheduleId,
+      'stationId': stationId,
+      'arrivalTime': arrivalTime,
+      'departureTime': departureTime,
+      'stopOrder': stopOrder,
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
+    };
+
+    if (stationName != null) {
+      data['stationName'] = stationName;
+    }
+    
+    if (stationCode != null) {
+      data['stationCode'] = stationCode;
+    }
+
+    return data;
+  }
+
+  ScheduleStop copyWith({
+    String? id,
+    String? scheduleId,
+    String? stationId,
+    String? arrivalTime,
+    String? departureTime,
+    int? stopOrder,
+    String? stationName,
+    String? stationCode,
+    String? createdAt,
+    String? updatedAt,
+  }) {
+    return ScheduleStop(
+      id: id ?? this.id,
+      scheduleId: scheduleId ?? this.scheduleId,
+      stationId: stationId ?? this.stationId,
+      arrivalTime: arrivalTime ?? this.arrivalTime,
+      departureTime: departureTime ?? this.departureTime,
+      stopOrder: stopOrder ?? this.stopOrder,
+      stationName: stationName ?? this.stationName,
+      stationCode: stationCode ?? this.stationCode,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 }

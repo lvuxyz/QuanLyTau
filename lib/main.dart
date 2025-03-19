@@ -4,13 +4,21 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'blocs/welcome/welcome_bloc.dart';
 import 'blocs/home/home_bloc.dart';
+import 'blocs/home/home_event.dart';
 import 'blocs/search/search_bloc.dart';
 import 'blocs/ticket/ticket_bloc.dart';
 import 'blocs/ticket/ticket_event.dart';
 import 'blocs/authentication/authentication_bloc.dart';
 import 'blocs/authentication/authentication_event.dart';
 import 'blocs/ship/ship_bloc.dart';
+import 'services/ship_service.dart';
+import 'services/auth_service.dart';
+import 'services/train_service.dart';
+import 'services/station_service.dart';
+import 'services/schedule_service.dart';
+import 'services/ticket_service.dart';
 import 'routes/app_routes.dart';
+import 'blocs/schedule/schedule_bloc.dart';
 
 void main() async {
   // Ensure Flutter is initialized
@@ -19,22 +27,34 @@ void main() async {
   // Set preferred orientations
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
-  // Preload resources for better performance
-  await _preloadResources();
+  // Create services
+  final scheduleService = ScheduleService();
+  final ticketService = TicketService();
 
-  runApp(MyApp());
+  runApp(
+    MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) => ScheduleBloc(scheduleService),
+        ),
+        BlocProvider(
+          create: (context) => TicketBloc(ticketService),
+        ),
+      ],
+      child: MyApp(),
+    ),
+  );
 }
 
 Future<void> _preloadResources() async {
   try {
     // Create a single instance of each BLoC to preload data
-    final ticketBloc = TicketBloc();
-    ticketBloc.add(LoadTickets());
+    final ticketService = TicketService();
+    final ticketBloc = TicketBloc(ticketService);
+    ticketBloc.add(LoadUserTickets());
 
     final homeBloc = HomeBloc();
-    // Ensure the event is of the correct type
-    // Either make LoadHomeData inherit from HomeEvent or create a new event
-    // homeBloc.add(LoadHomeData());
+    homeBloc.add(LoadHomeData());
 
     // Wait for initial data to be loaded (with timeout)
     await Future.wait([
@@ -51,14 +71,22 @@ class MyApp extends StatelessWidget {
   final authenticationBloc = AuthenticationBloc();
   final homeBloc = HomeBloc();
   final searchBloc = SearchBloc();
-  final ticketBloc = TicketBloc();
+  final ticketBloc = TicketBloc(TicketService());
 
-  MyApp({Key? key}) : super(key: key);
+  // Create services
+  final authService = AuthService();
+  final shipService = ShipService();
+  final trainService = TrainService();
+  final stationService = StationService();
+  final scheduleService = ScheduleService();
+  final ticketService = TicketService();
 
   @override
   Widget build(BuildContext context) {
     // Initialize the ticket data
-    ticketBloc.add(LoadTickets());
+    ticketBloc.add(LoadUserTickets());
+    // Initialize home data
+    homeBloc.add(LoadHomeData());
 
     return MultiBlocProvider(
       providers: [
@@ -67,34 +95,43 @@ class MyApp extends StatelessWidget {
         BlocProvider<HomeBloc>.value(value: homeBloc),
         BlocProvider<SearchBloc>.value(value: searchBloc),
         BlocProvider<TicketBloc>.value(value: ticketBloc),
-        BlocProvider<ShipBloc>(create: (context) => ShipBloc()),
+        BlocProvider<ShipBloc>(create: (context) => ShipBloc(shipService: shipService)),
       ],
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'Ship Manager',
-        theme: ThemeData(
-          primaryColor: Color(0xFF13B8A8),
-          scaffoldBackgroundColor: Colors.black,
-          appBarTheme: AppBarTheme(
-            backgroundColor: Colors.black,
-            elevation: 0,
+      child: MultiRepositoryProvider(
+        providers: [
+          RepositoryProvider<AuthService>(create: (context) => authService),
+          RepositoryProvider<ShipService>(create: (context) => shipService),
+          RepositoryProvider<TrainService>(create: (context) => trainService),
+          RepositoryProvider<StationService>(create: (context) => stationService),
+          RepositoryProvider<ScheduleService>(create: (context) => scheduleService),
+          RepositoryProvider<TicketService>(create: (context) => ticketService),
+        ],
+        child: MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'Ship Manager',
+          theme: ThemeData(
+            primaryColor: Color(0xFF13B8A8),
+            scaffoldBackgroundColor: Colors.black,
+            appBarTheme: AppBarTheme(
+              backgroundColor: Colors.black,
+              elevation: 0,
+            ),
+            visualDensity: VisualDensity.adaptivePlatformDensity,
+            pageTransitionsTheme: PageTransitionsTheme(
+              builders: {
+                TargetPlatform.android: ZoomPageTransitionsBuilder(),
+                TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+              },
+            ),
           ),
-          visualDensity: VisualDensity.adaptivePlatformDensity,
-          pageTransitionsTheme: PageTransitionsTheme(
-            builders: {
-              TargetPlatform.android: ZoomPageTransitionsBuilder(),
-              TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
-            },
-          ),
+          onGenerateRoute: AppRoutes.generateRoute,
+          home: SplashScreen(),
         ),
-        onGenerateRoute: AppRoutes.generateRoute,
-        home: SplashScreen(),
       ),
     );
   }
 }
 
-// Add the missing SplashScreen class
 class SplashScreen extends StatefulWidget {
   @override
   _SplashScreenState createState() => _SplashScreenState();
@@ -133,20 +170,22 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     // Initialize the authentication state before navigating
     context.read<AuthenticationBloc>().add(AppStarted());
 
-    // Navigate after splash animation
+    // Navigate after splash animation with mounted check
     Future.delayed(Duration(milliseconds: 2000), () {
-      Navigator.of(context).pushReplacement(
-        PageRouteBuilder(
-          pageBuilder: (_, __, ___) => AppRoutes.getInitialScreen(context),
-          transitionsBuilder: (_, animation, __, child) {
-            return FadeTransition(
-              opacity: animation,
-              child: child,
-            );
-          },
-          transitionDuration: Duration(milliseconds: 500),
-        ),
-      );
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          PageRouteBuilder(
+            pageBuilder: (_, __, ___) => AppRoutes.getInitialScreen(context),
+            transitionsBuilder: (_, animation, __, child) {
+              return FadeTransition(
+                opacity: animation,
+                child: child,
+              );
+            },
+            transitionDuration: Duration(milliseconds: 500),
+          ),
+        );
+      }
     });
   }
 
